@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <script src="./index.js" type="text/javascript" defer></script>
+    <title>Accelerate</title>
+</head>
+<body>
+    <div class="clock">
+        <div class="pinHolder"></div>
+        <div class="logo"><img src="./ferrari.png" alt="ferrari-logo"/></div>
+        <audio id="car-start">
+            <source src="./cobra-start.mp3" type="audio/mp3" />
+        </audio>
+        <audio id="car-accelerate">
+            <source src="./acceleration-edited.mp3" type="audio/mp3" />
+        </audio>
+        <div class="guage-cover">
+            <span style="--i:0"><span>0</span></span>
+            <span style="--j:0" class="point"><span></span></span>
+            <span style="--j:0.5" class="point"><span></span></span>
+            <span style="--i:1"><span>40</span></span>
+            <span style="--j:1" class="point"><span></span></span>
+            <span style="--j:1.5" class="point"><span></span></span>
+            <span style="--i:2"><span>80</span></span>
+            <span style="--j:2" class="point"><span></span></span>
+            <span style="--j:2.5" class="point"><span></span></span>
+            <span style="--i:3"><span>120</span></span>
+            <span style="--j:3" class="point"><span></span></span>
+            <span style="--j:3.5" class="point"><span></span></span>
+            <span style="--i:4"><span>160</span></span>
+            <span style="--j:4" class="point"><span></span></span>
+            <span style="--j:4.5" class="point"><span></span></span>
+            <span style="--i:5"><span>200</span></span>
+            <span style="--j:5" class="point"><span></span></span>
+            <span style="--j:5.5" class="point"><span></span></span>
+            <span style="--i:6"><span>240</span></span>
+            <span style="--j:6" class="point"><span></span></span>
+            <span style="--j:6.5" class="point"><span></span></span>
+            <span style="--i:7"><span>280</span></span>
+            <span style="--j:7" class="point"><span></span></span>
+            <span style="--j:7.5" class="point"><span></span></span>
+            <span style="--i:8"><span>320</span></span>
+            <span style="--j:8" class="point"><span></span></span>
+            <span style="--j:8.5" class="point"><span></span></span>
+            <span style="--i:9"><span>360</span></span>
+            <span style="--j:9" class="point"><span></span></span>
+            <span style="--j:9.5" class="point"><span></span></span>
+            <span style="--i:10"><span>400</span></span>
+            <span style="--j:10" class="point"><span></span></span>
+            <div class="sec">
+                <div class="sc" id="sc"><div class="pointer"></div></div>
+                
+            </div>
+        </div>
+        <p id="digitalSpeed">0</p>
+    </div>
+    <div class="controls">
+        <button id="brake-pedal">|||</button>
+        <button id="gad-pedal">|||</button>
+    </div>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <title>Loader</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0e1538;
+            font-family: sans-serif;
+        }
+        .box{
+            position: relative;
+            font-weight: bold;
+            --border-radius: 20px;
+            position: relative;
+            border-radius: var(--border-radius);
+            background: #3b3e4e;
+            color: #ffffff;
+            overflow: hidden;
+            z-index: 1;
+            transition: 0.5s;
+        }
+        .icon{
+            margin-right: 5px;
+        }
+        .box > .download, .box > .complete, .box > .check{
+            display: none;
+        }
+        .box.progress{
+            width: 500px;
+            height: 10px;
+        }
+        .box.progress > .progress{
+            width: 0%;
+            height: 100%;
+            background: #00ccff;
+            animation: animate 3s linear forwards;
+            animation-delay: 0.5s;
+        }
+        @keyframes animate{
+            0%{
+                width: 0%;
+            }
+            100%{
+                width: 100%;
+            }
+        }
+        .box, .box.complete, .box.download{
+            width: 200px;
+            height: 50px;
+        }
+        .box.check{
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .box.complete > .complete, .box.check > .check, .box.download > .download{
+            top: -200%;
+            color: black;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--border-radius);
+            animation: dragDown linear 0.2s forwards;
+            animation-delay: 0.2s;
+        }
+        .box.check > .check{
+            animation-delay: 0.6s !important;
+        }
+        @keyframes dragDown{
+            0%{
+                top: -200%;
+            }
+            100%{
+                top: 0;
+            }
+        }
+        .box.check > .check > .checked{
+            animation: grow linear 0.1s forwards;
+        }
+        @keyframes grow{
+            0%{
+                font-size: 0px !important;
+            }
+            100%{
+                font-size: 1rem !important;
+                font-weight: bold !important;
+            }
+        }
+        .box.download > .download{
+            cursor: pointer;
+            color: rgb(148, 148, 148) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="progress"></div>
+        <div class="download" id="download">
+            <span class="material-icons icon">
+                file_download
+            </span>
+            Download
+        </div>
+        <div class="complete">
+            <span class="material-icons icon">
+                check_circle
+            </span>
+            Complete
+        </div>
+        <div class="check">
+            <span class="material-icons checked">
+                done
+            </span>
+        </div>
+        <script>
+            const box = document.getElementsByClassName('box')[0];
+            const addDownload = () => {
+                box.classList.remove('check');
+                box.classList.remove('progress');
+                box.classList.add('download');
+            }
+            addDownload();
+            const downloadBtn = box.querySelector(".download");
+
+            const addCheck = () => {
+                box.classList.remove('complete');
+                box.classList.add('check')
+                setTimeout(addDownload, 1000)
+            }
+
+            const addCompleted = () => {
+                box.classList.add('complete')
+                setTimeout(addCheck,1000);
+            }
+
+            downloadBtn.addEventListener('click', () => {
+                box.classList.remove('download')
+                box.classList.add('progress')
+                setTimeout(addCompleted,4000);
+            })
+        </script>
+    </div>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loader</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0e1538;
+            font-family: sans-serif;
+        }
+        .loader{
+            --border-radius: 50%;
+            --size: 1em;
+            --inset-width: calc(var(--size) * 0.05);
+            position: relative;
+            width: var(--size);
+            height: var(--size);
+            background: rgb(20, 19, 19);
+            border-radius: var(--border-radius);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .loader>.before{
+            position: absolute;
+            width: 50%;
+            height: 150%;
+            animation: animate 1s linear infinite;
+            z-index: -2;
+        }
+        .before > *{
+            width: 100%;
+            height: 50%;
+        }
+        .before > .p-1{
+            background: rgb(20, 19, 19);
+        }
+        .before > .p-2 {
+            background: #ffffff;
+        }
+        .loader::after{
+            content: '';
+            position: absolute;
+            inset: var(--inset-width);
+            background: #0e1538;
+            border-radius: var(--border-radius);
+            z-index: -1;
+        }
+        @keyframes animate{
+            0%{
+                width: 80%;
+                transform: rotate(0deg);
+            }
+            50%{
+                width: 30%;
+            }
+            100%{
+                width: 80%;
+                transform: rotate(360deg);
+            }
+        }
+        .spinner{
+            height: 2rem;
+            width: 2rem;
+            background: transparent;
+            border-radius: 50%;
+            border: .25rem solid white;
+            border-top-color: transparent;
+            animation: rotate 1s linear infinite;
+        }
+        @keyframes rotate{
+            0%{
+                transform: rotate(0deg);
+            }
+            100%{
+                transform: rotate(360deg);
+            }
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- <div class="loader">
+        <div class="before">
+            <div class="p-1"></div>
+            <div class="p-2"></div>
+        </div>
+    </div> -->
+    <div class="spinner">
+        <span class="sr-only">Loading...</span>
+    </div>
+</body>
+</html>
