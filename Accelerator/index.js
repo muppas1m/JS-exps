@@ -8,9 +8,11 @@ let accelerateInterval;
 let descelerateInterval;
 let speed = 0;
 
-const renderSpeed = (speed) => {
+const renderSpeed = (speed, options = { speedRender : true }) => {
     speedIndicator.style.transform = `rotateZ(${speed*0.675}deg)`; // 0-400 in a 270deg scale = 0.765
-    digitalSpeed.textContent = speed;
+    if(options.speedRender){
+        digitalSpeed.textContent = speed;
+    }
 }
 
 const stopAccelerationSound = () => {
@@ -18,12 +20,13 @@ const stopAccelerationSound = () => {
     carAccelerateAudio.currentTime = 2;
 }
 
-const accelerateHelper = (maxSpeed, interval, nextStage) => {
+const accelerateHelper = (maxSpeed, interval, nextStage, options = {}) => {
+    const { step = 1, speedRender = true } = options;
     clearInterval(accelerateInterval);
     accelerateInterval = setInterval(() => {
         if(speed >= maxSpeed) return (nextStage && nextStage());
-        speed += 1;
-        renderSpeed(speed);
+        speed += step;
+        renderSpeed(speed, {speedRender});
     }, interval)
 }
 
@@ -68,15 +71,16 @@ const slowDown = () => {
     }, 50);
 }
 
-const descelerate = () => {
+const descelerate = (e = null, options = {}) => {
+    const { rate = 15, step = 1, speedRender = true} = options;
     stopAccelerationSound();
     clearInterval(accelerateInterval);
     clearInterval(descelerateInterval);
     descelerateInterval = setInterval(() => {
         if(!speed) return clearInterval(descelerateInterval);
-        speed -=1;
-        renderSpeed(speed);
-    }, 15); //23
+        speed -= step;
+        renderSpeed(speed, {speedRender});
+    }, rate); //23
 }
 
 // Dom element interation
@@ -120,3 +124,12 @@ window.addEventListener('keyup', (e) => {
         return slowDown();
     }
 });
+
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        const options = {step: 3, rate: 0, speedRender: false};
+        accelerateHelper(400, 0, () => {
+            descelerate(null, options)
+        }, options);    
+    }, 800)
+})
