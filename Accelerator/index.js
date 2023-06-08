@@ -77,8 +77,10 @@ const descelerate = (e = null, options = {}) => {
     clearInterval(accelerateInterval);
     clearInterval(descelerateInterval);
     descelerateInterval = setInterval(() => {
-        if(!speed) return clearInterval(descelerateInterval);
-        speed -= step;
+        if(speed<=0) {
+            speed = 0
+            return clearInterval(descelerateInterval);
+        }        speed -= step;
         renderSpeed(speed, {speedRender});
     }, rate); //23
 }
@@ -127,7 +129,7 @@ window.addEventListener('keyup', (e) => {
 
 window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
-        const options = {step: 3, rate: 0, speedRender: false};
+        const options = {step: 2.2, rate: 0, speedRender: false};
         accelerateHelper(400, 0, () => {
             descelerate(null, options)
         }, options);    
