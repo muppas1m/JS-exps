@@ -9,3 +9,4 @@
 // 9. floating icon Animation
 // 10. words attack typing game
 // 11. z-index object depth in water/jelly - object lift up and down 
+// 12. Raising hands on scrolling animation
