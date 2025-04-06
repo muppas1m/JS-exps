@@ -1,53 +1,36 @@
-(function() { // IOS fix for audio context issue
-	window.AudioContext = window.AudioContext || window.webkitAudioContext;
-	if (window.AudioContext) {
-		window.audioContext = new window.AudioContext();
-	}
-	var fixAudioContext = function (e) {
-		if (window.audioContext) {
-			// Create empty buffer
-			var buffer = window.audioContext.createBuffer(1, 1, 22050);
-			var source = window.audioContext.createBufferSource();
-			source.buffer = buffer;
-			// Connect to output (speakers)
-			source.connect(window.audioContext.destination);
-			// Play sound
-			if (source.start) {
-				source.start(0);
-			} else if (source.play) {
-				source.play(0);
-			} else if (source.noteOn) {
-				source.noteOn(0);
-			}
-		}
-		// Remove events
-		document.removeEventListener('touchstart', fixAudioContext);
-		document.removeEventListener('touchend', fixAudioContext);
-	};
-	// iOS 6-8
-	document.addEventListener('touchstart', fixAudioContext);
-	// iOS 9
-	document.addEventListener('touchend', fixAudioContext);
-})();
 export class SoundManager {
   constructor() {
+    this.audioAllowed = false;
+    // Initialize audio context on first interaction
+    document.addEventListener('click', this.initAudioContext.bind(this), { once: true });
+    document.addEventListener('touchstart', this.initAudioContext.bind(this), { once: true });
+  }
+  initAudioContext() {
+    // Create audio context after user interaction
     this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    this.audioAllowed = true;
+    
+    // Initialize sounds after context is created
     this.engineSources = {
-        // engine states
       idle: this.loadSound('engine-idle'),
       low: this.loadSound('engine-low'),
       high: this.loadSound('engine-high'),
     };
+    
     this.actionSounds = {
-      //action based,
       start: this.loadSound('engine-start'),
       shift: this.loadSound('gear-shift')
-    }
+    };
+    
     this.currentEngine = null;
   }
-
   loadSound(id) {
     const element = document.getElementById(id);
+    
+    // iOS requires this for audio elements
+    element.preload = 'auto';
+    element.load();
+    
     const source = this.ctx.createMediaElementSource(element);
     source.connect(this.ctx.destination);
     return { element, source };
@@ -70,14 +53,29 @@ export class SoundManager {
     // this.crossfadeToSound(targetSound);
   }
 
-  playStartSound(){
+  playStartSound() {
+    if (!this.audioAllowed) return;
+    
+    // Ensure context is running (iOS requirement)
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+    
     this.actionSounds.start.element.currentTime = 0;
-    this.actionSounds.start.element.play();
+    this.actionSounds.start.element.play()
+      .catch(e => console.warn("Audio play failed:", e));
   }
 
   playShiftSound() {
+    if (!this.audioAllowed) return;
+    
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+    
     this.actionSounds.shift.element.currentTime = 0;
-    this.actionSounds.shift.element.play();
+    this.actionSounds.shift.element.play()
+      .catch(e => console.warn("Audio play failed:", e));
   }
 
   playIdleSound(){

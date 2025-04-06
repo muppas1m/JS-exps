@@ -31,6 +31,7 @@ body{
     border: 15px solid #2C3A6A;
     border-radius: 50%;
     user-select: none;
+    -webkit-user-select: none;
 }
 .clock::before{
     content: '';
@@ -116,7 +117,7 @@ body{
     transform-style: preserve-3d;
     transform: rotateX(-20deg);
     user-select: none;
-    touch-action: none;
+    -webkit-user-select: none;
 }
 button#gas-pedal, button#brake-pedal{
     display: none;
@@ -139,7 +140,7 @@ button#gas-pedal, button#brake-pedal{
     transform-origin: bottom;
     border-bottom: 10px solid rgb(126, 125, 125);
     user-select: none;
-    touch-action: none;
+    -webkit-user-select: none;
 }
 button#brake-pedal{
     height: 100px !important;
@@ -325,7 +326,7 @@ button#brake-pedal:active, button#brake-pedal.active{
     font-size: 1.1rem;
     letter-spacing: 1px;
     user-select: none;
-    touch-action: none;
+    -webkit-user-select: none;
 }
 #engine-button.busy {
     opacity: 0.7;

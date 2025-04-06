@@ -20,6 +20,7 @@
     height: var(--gear-box-size);
     margin: var(--gear-box-margin);
     user-select: none;
+    -webkit-user-select: none;
 }
 
 .gear-map {
@@ -30,6 +31,7 @@
   display: inline-block;
   position: absolute;
   user-select: none;
+  -webkit-user-select: none;
 }
 
 .tracker {
