@@ -115,11 +115,12 @@ body{
     justify-content: space-around;
     transform-style: preserve-3d;
     transform: rotateX(-20deg);
+    user-select: none;
+    touch-action: none;
 }
 button#gas-pedal, button#brake-pedal{
     display: none;
     position: relative;
-    user-select: none;
     width: 24%;
     max-width: 100px;
     height: 180px;
@@ -138,6 +139,7 @@ button#gas-pedal, button#brake-pedal{
     transform-origin: bottom;
     border-bottom: 10px solid rgb(126, 125, 125);
     user-select: none;
+    touch-action: none;
 }
 button#brake-pedal{
     height: 100px !important;
@@ -323,6 +325,7 @@ button#brake-pedal:active, button#brake-pedal.active{
     font-size: 1.1rem;
     letter-spacing: 1px;
     user-select: none;
+    touch-action: none;
 }
 #engine-button.busy {
     opacity: 0.7;
