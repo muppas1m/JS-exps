@@ -17,6 +17,7 @@ body{
     min-height: 100vh;
     background: #000025;
     color: #BEE5EC;
+    position: relative;
 }
 .clock{
     position: relative;
@@ -84,9 +85,11 @@ body{
     width: 220px;
     height: 220px;
     position: absolute;
-    opacity: 0.5;
-    animation: print linear forwards;
-    animation-duration: 0.1s;
+    opacity: 0.7;
+}
+.clock.ignition .sec,
+.clock.ignition .sc{
+    opacity: 1;
 }
 .sc{
     display: flex;
@@ -113,7 +116,8 @@ body{
     transform-style: preserve-3d;
     transform: rotateX(-20deg);
 }
-button#gad-pedal, button#brake-pedal{
+button#gas-pedal, button#brake-pedal{
+    display: none;
     position: relative;
     user-select: none;
     width: 24%;
@@ -133,18 +137,19 @@ button#gad-pedal, button#brake-pedal{
     transform-style: preserve-3d;
     transform-origin: bottom;
     border-bottom: 10px solid rgb(126, 125, 125);
+    user-select: none;
 }
 button#brake-pedal{
     height: 100px !important;
     font-size: 3rem;
 }
-button#gad-pedal:active,button#gad-pedal.active ,button#brake-pedal:active,button#brake-pedal.active{
+button#gas-pedal:active,button#gas-pedal.active ,button#brake-pedal:active,button#brake-pedal.active{
     box-shadow: 0px 3px 5px 0px gray;
     transform-origin: bottom;
     transform: rotateX(20deg);
     clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0 100%);
 }
-button#gad-pedal:active, button#gad-pedal.active{
+button#gas-pedal:active, button#gas-pedal.active{
     height: 150px;
     font-size: 3.2rem;
 }
@@ -163,6 +168,9 @@ button#brake-pedal:active, button#brake-pedal.active{
     transform: translate(-50%, -50%);
     font-weight: bold;
     opacity: 0.2;
+}
+.clock.ignition #digitalSpeed,
+.clock.ignition #gearIndicator{
     animation: print linear forwards;
     animation-duration: 1.5s;
 }
@@ -224,6 +232,8 @@ button#brake-pedal:active, button#brake-pedal.active{
     font-weight: 700;
     opacity: 0.2;
     transform: rotate(calc(135deg - calc(27deg * var(--i))));
+}
+.clock.ignition .guage-cover > span:not(.point) > span{
     animation: print linear forwards;
     animation-duration: calc(var(--i)*0.08s);
 }
@@ -244,6 +254,24 @@ button#brake-pedal:active, button#brake-pedal.active{
     color: #BEE5EC;
     font-size: 1.3rem;
 }
+.guage-cover > span.point > span{
+    width: 3px;
+    height: 23px;
+    top: -25px;
+    background: #BEE5EC;
+    opacity: 0.2;
+}
+.clock.ignition .guage-cover > span.point > span{
+    animation: print linear forwards;
+    animation-duration: calc(var(--j)*0.08s);
+}
+.guage-cover > span.point:nth-child(3n) > span:first-child{
+    background: #7facb4;
+    width: 2.5px;
+    height: 7px;
+    z-index: -1;
+    top: -23px;
+}
 @keyframes print {
     0%{
         opacity: 0.2;
@@ -257,22 +285,6 @@ button#brake-pedal:active, button#brake-pedal.active{
         opacity: 1;
     }
 }
-.guage-cover > span.point > span{
-    width: 3px;
-    height: 23px;
-    top: -25px;
-    background: #BEE5EC;
-    opacity: 0.2;
-    animation: print linear forwards;
-    animation-duration: calc(var(--j)*0.08s);
-}
-.guage-cover > span.point:nth-child(3n) > span:first-child{
-    background: #7facb4;
-    width: 2.5px;
-    height: 7px;
-    z-index: -1;
-    top: -23px;
-}
 .logo{
     position: absolute;
     top: 22%;
@@ -281,11 +293,15 @@ button#brake-pedal:active, button#brake-pedal.active{
     height: 50px;
     width: 50px;
     object-fit: cover;
+    opacity: 0.5;
+}
+.clock.ignition .logo > img{
+    opacity: 1;
 }
 @media (max-width:767px){
     .clock{
         position: absolute;
-        top: 15%;
+        top: 33%;
         width: 300px;
         height: 300px;
     }
@@ -294,4 +310,31 @@ button#brake-pedal:active, button#brake-pedal.active{
         height: 180px;
         position: absolute;
     }
+}
+#engine-button{
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 5px solid silver;
+    background: #0078d1;
+    color: #fff;
+    cursor: pointer;
+    outline: none;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    user-select: none;
+}
+#engine-button.busy {
+    opacity: 0.7;
+    pointer-events: none;
+}
+/* override current gear-map or other CSS styles  */
+.gear-map{
+    top: 0;
+    right: 0;
+}
+.switch-container{
+    position: absolute;
+    top: 0;
+    left: 0;
 }

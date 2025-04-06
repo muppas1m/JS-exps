@@ -4,19 +4,24 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./gearbox.css">
+    <link rel="stylesheet" href="./customSwitch.css">
     <link rel="stylesheet" href="styles.css">
-    <script src="./index.js" type="text/javascript" defer></script>
+    <script type="module" src="./gearShifter.js" type="text/javascript" defer></script>
+    <script type="module" src="./index.js" type="text/javascript" defer></script>
     <title>Accelerate</title>
 </head>
 <body>
+    <audio id="engine-start" src="./engineStart.mp3" preload="auto"></audio>
+    <audio id="engine-idle" loop src="./engineIdle.mp3"  preload="auto"></audio>
+    <audio id="engine-low" loop src="./engineLow.mp3" preload="auto"></audio>
+    <audio id="engine-high" loop src="./engineHigh.mp3" preload="auto"></audio>
+    <audio id="gear-shift" src="./carShift.mp3" preload="auto"></audio>
     <div class="clock">
         <div class="pinHolder"></div>
         <div class="logo"><img src="./bugatti.png" alt="ferrari-logo"/></div>
         <audio id="car-start">
             <source src="./cobra-start.mp3" type="audio/mp3" />
-        </audio>
-        <audio id="car-accelerate">
-            <source src="./acceleration-edited.mp3" type="audio/mp3" />
         </audio>
         <div class="guage-cover">
             <span style="--i:0"><span>0</span></span>
@@ -62,9 +67,22 @@
         </p>
         <p id="digitalSpeed">0</p>
     </div>
+    <div class="switch-container">
+        <span class="switch-label">Automatic</span>
+        <label class="boxy-switch">
+            <input type="checkbox">
+            <span class="boxy-slider"></span>
+        </label>
+    </div>
+    <div class="gear-map">
+        <div class="container">
+            <div class="line horizontal"></div>
+        </div>
+    </div>
     <div class="controls">
         <button id="brake-pedal">|||</button>
-        <button id="gad-pedal">|||</button>
+        <button id="engine-button">ENGINE</button>
+        <button id="gas-pedal">|||</button>
     </div>
 </body>
 </html>

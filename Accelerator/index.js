@@ -1,21 +1,32 @@
-const gasPedal = document.getElementById('gad-pedal');
+import { SoundManager } from "./carFx.js";
+import { GearShifter } from "./gearShifter.js";
+const shifter = new GearShifter(document.querySelector('.container'));
+
+const gasPedal = document.getElementById('gas-pedal');
 const brakePedal = document.getElementById('brake-pedal');
 const digitalSpeed = document.getElementById('digitalSpeed');
 const gearIndicator = document.getElementById('gearIndicator');
-const controls = document.getElementsByClassName('controls')[0];
 const speedIndicator = document.querySelector('#sc');
-const carStartAudio = document.getElementById('car-start');
-const carAccelerateAudio = document.getElementById('car-accelerate');
-let accelerateInterval, descelerateInterval, shiftDelayId, shiftDelayAnimationId;
-let speed = 0, prevGear = 0, currentGear = 0, isThrottlePressed = false;
-let ignition = false;
+const ignitionButton = document.getElementById('engine-button');
+const main_guage = document.querySelector('.clock');
+const switchContainer = document.querySelector('.switch-container');
+const transmissionSwitch = document.querySelector('.switch-container input');
+const switchLabel = document.querySelector('.switch-container .switch-label');
+
+const soundManager = new SoundManager();
 const gearSequence = ['R', 'P', 'N', 1, 2, 3, 4, 5, 6, 7, 8], gearDisplayCap = 3;
+
+// state variables
+let accelerateInterval, descelerateInterval, shiftDelayId, shiftAnimationId;
+let speed = 0, prevGear = 0, currentGear = 'P', isThrottlePressed = false;
+let ignition = false, isAnimating = false, isEngineBusy = false;
+let keyDown = false, keyUp = false, isManualMode = false;
 
 const isGearChange = () => prevGear!==currentGear;
 
 const inRange = (min, max, val) => (val>=min && val<=max);
 
-const getCurrentGear = (speed) => {
+const getCurrentGearBySpeed = (speed) => {
     if(speed<=0) {
         if(ignition) return 'N';
         return 'P';
@@ -33,83 +44,109 @@ const getCurrentGear = (speed) => {
     }
 }
 
-// helper function to display needle movement, digital speed and gears
-const renderSpeed = (speed, options = { }) => {
-    // const easedSpeed = !ignition ? (speed < 300 ? speed : speed * 0.8) : speed; // Slow down needle above 300km/h
+function handleManualGearShift(e){
+    if(!isManualMode) return; // should work only on manual
+    displayGearChange(isNaN(e.gear) ? e.gear : Number(e.gear));
+    if(isThrottlePressed) sequentialAccelerate();
+}
 
+shifter.on('gearChange', handleManualGearShift);
+
+function displayGearChange(gear){
+    if(gear) currentGear = gear;
+    const gearIndex = gearSequence.findIndex(gear => (['R,P,N'].includes(currentGear) || gear===currentGear));
+    for (let node of gearIndicator.children) {
+        if (node.classList.value === 'leftGears') {
+            node.textContent = gearSequence.slice(Math.max(0, gearIndex - gearDisplayCap), gearIndex).join('');
+        } else if (node.classList.value === 'currentGear') {
+            if (shiftAnimationId) clearTimeout(shiftAnimationId); // clear prev gear animation
+
+             // when slowing, or for the first gear, or for manual mode
+            if (!isThrottlePressed || (isThrottlePressed && currentGear === 1) || (isThrottlePressed && isManualMode)) soundManager.playShiftSound();
+
+            gearIndicator.classList.add('shift');
+            if(!isManualMode) shifter.moveToGear(currentGear.toString()); // gear shift when automatic mode;
+            shiftAnimationId = setTimeout(() => gearIndicator.classList.remove('shift'), 200); // animate current gear
+            node.textContent = gearSequence[gearIndex];
+        } else {
+            node.textContent = gearSequence.slice(gearIndex + 1, gearIndex + gearDisplayCap + 1).join('');
+        }
+    }
+}
+
+const renderGearChangeBySpeed = (speed) => {
+    if(isManualMode) return;
+    currentGear = getCurrentGearBySpeed(speed);
+    if(isGearChange()) displayGearChange();
+    prevGear = currentGear;
+}
+
+// helper function to display needle movement, digital speed and gears
+const renderSpeed = (speed) => {
+    // const easedSpeed = !ignition ? (speed < 300 ? speed : speed * 0.8) : speed; // Slow down needle above 300km/h
     speedIndicator.style.transform = `rotateZ(${speed*0.675}deg)`; // 0-400 in a 270deg scale = 0.675
     if(ignition){
-        currentGear = getCurrentGear(speed);
-        const gearIndex = gearSequence.findIndex(gear => (['R,P,N'].includes(currentGear) || gear===currentGear));
-        for(let node of gearIndicator.children){
-            if(node.classList.value==='leftGears'){
-                node.textContent = gearSequence.slice(Math.max(0, gearIndex - gearDisplayCap), gearIndex).join('');
-            } else if(node.classList.value==='currentGear'){
-                if(isGearChange()){
-                    if(shiftDelayAnimationId) clearTimeout(shiftDelayAnimationId);
-                    gearIndicator.classList.add('shift');
-                    shiftDelayAnimationId = setTimeout(() => gearIndicator.classList.remove('shift'), 200);
-                }
-                node.textContent = gearSequence[gearIndex];
-            } else{
-                node.textContent = gearSequence.slice(gearIndex+1, gearIndex + gearDisplayCap+1).join('');
-            }
-        }
-        prevGear = currentGear;
+        renderGearChangeBySpeed(speed);
         digitalSpeed.textContent = Math.floor(speed);
     }
 }
 
-const stopAccelerationSound = () => {
-    carAccelerateAudio.pause();
-    carAccelerateAudio.currentTime = 2;
-}
-
-const initiateDesceleration = () => {
+const clearExistingIntervals = () => {
     clearTimeout(shiftDelayId);
     clearInterval(accelerateInterval);
     clearInterval(descelerateInterval);
 }
 
-const slowDown = () => {
+function descelerateHelper(e, step = 1, rate = 50, callback) {
     isThrottlePressed = false;
-    stopAccelerationSound();
-    initiateDesceleration();
-    descelerateInterval = setInterval(() => {
-        if(speed<=0) return clearInterval(descelerateInterval);
-        speed -=1;
-        renderSpeed(speed);
-    }, 50);
-}
-
-const descelerate = (e = null, options = {}, callback = null) => {
-    isThrottlePressed = false;
-    const { rate = 15, step = 1 } = options;
-    stopAccelerationSound();
-    initiateDesceleration();
+    clearExistingIntervals();
     descelerateInterval = setInterval(() => {
         if(speed<=0) {
-            speed = 0
+            speed = 0;
+            if(!isAnimating) soundManager.updateEngineSound(0, 0);
             clearInterval(descelerateInterval);
-            return callback && callback()
-        }        
+            return callback && callback();
+        }    
         speed -= step;
-        // speed -= speed > 200 ? 4 : (speed > 100 ? 2 : 1); // Aggressive braking at high speeds
+        if(!isAnimating){
+            let currgear = getCurrentGearBySpeed(speed);
+            soundManager.updateEngineSound(speed, ['N','P'].includes(currgear) ? 0 : currgear);
+        }
         renderSpeed(speed);
     }, rate);
+}
+
+function descelerate(e = null, options = {}, callback = null) {
+    const { rate = 15, step = 1 } = options;
+    clearExistingIntervals();
+    return descelerateHelper(e, step, rate, callback);
 }
 
 const accelerateHelper = (maxSpeed, interval, nextGearCB, options = {}) => {
     const { step = 1 } = options;
     clearInterval(accelerateInterval);
-    // let strt = Date.now(), low = speed;
     accelerateInterval = setInterval(() => {
-        if(!isThrottlePressed && ignition) return slowDown(); // to slowDown when throttle is released during gear change
+        if(!isThrottlePressed && ignition) return descelerateHelper(); // to descelerateHelper when throttle is released during gear change
         if (speed >= maxSpeed) {
-            // console.log(low, ' to ', maxSpeed, ': ', Date.now() - strt, 'ms')
-            return (nextGearCB && nextGearCB());
+            if(isManualMode && speed > maxSpeed) {
+                clearInterval(accelerateInterval);
+                accelerateInterval = setInterval(() => {
+                    if(speed<=maxSpeed){
+                        return sequentialAccelerate();
+                    }
+                    speed -=1;
+                    renderSpeed(speed);
+                }, 50)
+            } else{
+                if(!isManualMode && speed<400) soundManager.playShiftSound(); // for accelerating
+                return (nextGearCB && nextGearCB());
+            }
         }
         speed += step;
+        if(!isAnimating){
+            let currgear = getCurrentGearBySpeed(speed);
+            soundManager.updateEngineSound(speed, ['N','P'].includes(currgear) ? 0 : currgear);
+        }
         renderSpeed(speed);
     }, interval)
 }
@@ -120,7 +157,6 @@ const shiftDelay = (nextGearCB, gearShiftDelay = 200) => {
 
 // gear profiles 
 // gear profile = (() => accelerateHelper(gearTopSpeed, interval, next_gear_callback));
-
 // 0 -> 80 in 1.8s, so each tick cost 22.5ms
 const gear1 = () => accelerateHelper(80, 22.5, () => shiftDelay(gear2, 150));
 // 80 -> 140, shiftDelay(0.15s) + 1.05s = 1.2s
@@ -138,91 +174,153 @@ const gear7 = () => accelerateHelper(380, 305.66, () => shiftDelay(gear8, 20));
 // 380 -> 400, 0.02 + 5.88s = 5.9s
 const gear8 = () => accelerateHelper(400, 294);
 
-const accelerate = () => {
+function sequentialAccelerate(){
     isThrottlePressed = true;
     clearInterval(descelerateInterval);
-    carStartAudio.pause();
-    carStartAudio.currentTime = 0;
-    carAccelerateAudio.play();
+    switch(currentGear){
+        case 'N': return accelerateHelper(0, 0);
+        case 'P': return accelerateHelper(0, 0);
+        case 1 : return accelerateHelper(80, 22.5)
+        case 2 : return accelerateHelper(140, 17.5)
+        case 3 : return accelerateHelper(200, 28)
+        case 4 : return accelerateHelper(250, 42.4)
+        case 5 : return accelerateHelper(300, 72.4)
+        case 6 : return accelerateHelper(350, 122.8)
+        case 7 : return accelerateHelper(380, 305.66)
+        case 8 : return accelerateHelper(400, 294)
+        default: return;
+    }
+}
+
+function accelerate() {
+    if(isManualMode) return sequentialAccelerate();
+    isThrottlePressed = true;
+    clearInterval(descelerateInterval);
     switch(true){
-        case inRange(0, 80, speed):{
-            return gear1();
-        }
-        case inRange(81, 140, speed):{
-            return gear2();
-        }
-        case inRange(141, 200, speed):{
-            return gear3();
-        }
-        case inRange(201, 250, speed):{
-            return gear4();
-        }
-        case inRange(251, 300, speed):{
-            return gear5();
-        }
-        case inRange(301, 350, speed):{
-            return gear6();
-        }
-        case inRange(351, 380, speed):{
-            return gear7();
-        }
-        case inRange(381, 400, speed):{
-            return gear8();
-        }
+        case inRange(0, 80, speed): return gear1();
+        case inRange(81, 140, speed): return gear2();
+        case inRange(141, 200, speed): return gear3();
+        case inRange(201, 250, speed): return gear4();
+        case inRange(251, 300, speed): return gear5();
+        case inRange(301, 350, speed): return gear6();
+        case inRange(351, 380, speed): return gear7();
+        case inRange(381, 400, speed): return gear8();
         default : return;
     }
 }
 
-let keyDown = false, keyUp = false;
+function keyDownListener(e){
+    if(!["ArrowUp", "Space", "ArrowDown"].includes(e.code)) return;
+    keyUp = false;
+    if(!keyDown){
+        keyDown = true;
+        if(e.code==="ArrowUp"){
+            gasPedal.classList.add('active');
+            return accelerate();
+        }
+        else if(["ArrowDown", "Space"].includes(e.code)){
+            brakePedal.classList.add('active');
+            return descelerate();
+        }
+    }
+}
+
+function keyUpListener(e){
+    keyDown = false;
+    if(!keyUp){
+        keyUp = true;
+        gasPedal.classList.remove('active');
+        brakePedal.classList.remove('active');
+        return descelerateHelper();
+    }
+}
+
 function setControls(){
     ignition = true;
-    renderSpeed(speed);
-    controls.style.display = 'flex';
+    renderGearChangeBySpeed(speed);
+    brakePedal.style.display = 'block';
+    gasPedal.style.display = 'block';
     
     // Dom element interation
     gasPedal.addEventListener('mousedown', accelerate);
     gasPedal.addEventListener('touchstart', accelerate);
 
-    gasPedal.addEventListener('mouseup', slowDown);
-    gasPedal.addEventListener('touchend', slowDown);
+    gasPedal.addEventListener('mouseup', descelerateHelper);
+    gasPedal.addEventListener('touchend', descelerateHelper);
 
     brakePedal.addEventListener('mousedown', descelerate);
     brakePedal.addEventListener('touchstart', descelerate);
 
-    brakePedal.addEventListener('mouseup', slowDown);
-    brakePedal.addEventListener('touchend', slowDown);
+    brakePedal.addEventListener('mouseup', descelerateHelper);
+    brakePedal.addEventListener('touchend', descelerateHelper);
 
     // keyboard interaction
-    window.addEventListener('keydown', (e) => {
-        if(!["ArrowUp", "Space", "ArrowDown"].includes(e.code)) return;
-        keyUp = false;
-        if(!keyDown){
-            keyDown = true;
-            if(e.code==="ArrowUp"){
-                gasPedal.classList.add('active');
-                return accelerate();
-            }
-            else if(["ArrowDown", "Space"].includes(e.code)){
-                brakePedal.classList.add('active');
-                return descelerate();
-            }
-        }
-    });
-    window.addEventListener('keyup', (e) => {
-        keyDown = false;
-        if(!keyUp){
-            keyUp = true;
-            gasPedal.classList.remove('active');
-            brakePedal.classList.remove('active');
-            return slowDown();
-        }
-    });
+    window.addEventListener('keydown', keyDownListener);
+    window.addEventListener('keyup', keyUpListener);
 }
 
-window.addEventListener('DOMContentLoaded', () => { // For guage sweep & aesthetics
-    controls.style.display = 'none'
-    setTimeout(() => {
-        const options = { step: 4, rate: 7 };
-        accelerateHelper(400, 7, () => descelerate(null, options, setControls), options); 
-    }, 800)
+function unsetControls(){
+    ignition = false;
+    renderGearChangeBySpeed(speed);
+    brakePedal.style.display = 'none';
+    gasPedal.style.display = 'none';
+    gasPedal.removeEventListener('mousedown', accelerate);
+    gasPedal.removeEventListener('touchstart', accelerate);
+
+    gasPedal.removeEventListener('mouseup', descelerateHelper);
+    gasPedal.removeEventListener('touchend', descelerateHelper);
+
+    brakePedal.removeEventListener('mousedown', descelerate);
+    brakePedal.removeEventListener('touchstart', descelerate);
+
+    brakePedal.removeEventListener('mouseup', descelerateHelper);
+    brakePedal.removeEventListener('touchend', descelerateHelper);
+    window.removeEventListener('keydown', keyDownListener);
+    window.removeEventListener('keyup', keyUpListener);
+}
+
+ignitionButton.addEventListener('click', () => {
+    if (isEngineBusy || speed > 0) return;
+
+    isEngineBusy = true;
+
+    if(ignition){ // when engine is already on, turn it off;
+        setTimeout(() => {
+            soundManager.engineSources.idle.element.pause();
+            main_guage.classList.toggle('ignition'),
+            isEngineBusy = false;
+        }, 500)
+        transmissionSwitch.disabled = false;
+        unsetControls();
+    } else{
+        main_guage.classList.toggle('ignition');
+        isAnimating = true;
+        transmissionSwitch.disabled = true;
+        soundManager.playStartSound();
+        setTimeout(() => {
+            soundManager.updateEngineSound(0, 0); // Start with idle sound
+        }, 750);
+        setTimeout(() => {
+            const options = { step: 4, rate: 7 };
+            accelerateHelper(400, 7, () => descelerate(null, options, () => {
+                setControls();
+                isAnimating = false;
+                isEngineBusy = false;
+            }), options); 
+        }, 800)
+    }
+})
+
+transmissionSwitch.addEventListener('change', () => {
+    if(transmissionSwitch.checked){
+        isManualMode = true;
+        let temp = shifter.getCurrentGear();
+        if(temp!=currentGear){
+            displayGearChange(isNaN(temp) ? temp : Number(temp));
+        }
+        switchLabel.innerHTML = 'Manual';
+        return;
+    }
+    switchLabel.innerHTML = 'Automatic';
+    isManualMode = false;
 })

@@ -1,0 +1,79 @@
+:root {
+    --bg-color: #1a1a1a;
+    --switch-bg: #333;
+    --switch-active: #0078d1;
+    --switch-handle: #f0f0f0;
+    --border-color: #555;
+}
+
+.switch-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-left: 0.5rem;
+}
+
+.switch-label {
+    color: #ddd;
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.boxy-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.boxy-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.boxy-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--switch-bg);
+    border: 2px solid var(--border-color);
+    transition: .2s;
+    box-shadow: 0 2px 4px #0078d1;
+}
+
+.boxy-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 2px;
+    bottom: 2px;
+    background-color: var(--switch-handle);
+    transition: .2s;
+}
+
+input:checked + .boxy-slider {
+    background-color: var(--switch-active);
+    border-color: var(--switch-active);
+}
+
+input:checked + .boxy-slider:before {
+    transform: translateX(26px);
+}
+
+.boxy-slider, .boxy-slider:before {
+    border-radius: 4px;
+}
+
+input:focus + .boxy-slider {
+    box-shadow: 0 0 0 2px #0078d1;
+}
+
+input:disabled + .boxy-slider {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
