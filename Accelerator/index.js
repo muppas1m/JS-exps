@@ -270,67 +270,34 @@ function unsetControls(){
     window.removeEventListener('keyup', keyUpListener);
 }
 
-function startStopEngine() {
+function startStopEngine(){
     if (isEngineBusy || speed > 0) return;
     isEngineBusy = true;
-  
-    if (ignition) {
-      // Turn off engine
-      setTimeout(() => {
-        soundManager.engineSources.idle.element.pause();
-        main_guage.classList.remove('ignition');
-        isEngineBusy = false;
-      }, 500);
-      transmissionSwitch.disabled = false;
-      unsetControls();
-    } else {
-      // iOS-specific handling
-      if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        // Play a silent buffer first to warm up audio context
-        const buffer = soundManager.ctx.createBuffer(1, 1, 22050);
-        const source = soundManager.ctx.createBufferSource();
-        source.buffer = buffer;
-        source.connect(soundManager.ctx.destination);
-        source.start(0);
-        
-        // Then play the actual sound
+
+    if (ignition) { // when engine is already on, turn it off;
         setTimeout(() => {
-          carStartAudio.play().then(() => {
-            engineStartSequence();
-          }).catch(e => {
-            console.error("iOS audio play failed:", e);
-            // Fallback - try again with user gesture
-            document.body.addEventListener('touchend', function retry() {
-              carStartAudio.play().then(() => {
-                engineStartSequence();
-                document.body.removeEventListener('touchend', retry);
-              });
-            }, { once: true });
-          });
-        }, 100);
-      } else {
-        // Standard handling for other devices
+            soundManager.stopIdleSound();
+            main_guage.classList.toggle('ignition');
+            isEngineBusy = false;
+        }, 500)
+        transmissionSwitch.disabled = false;
+        unsetControls();
+    } else {
+        carStartAudio.volume = 1;
         carStartAudio.play().then(() => {
-          engineStartSequence();
+            main_guage.classList.toggle('ignition');
+            transmissionSwitch.disabled = true;
+            setTimeout(() => {
+                soundManager.playIdleSound(); // Start with idle sound
+            }, 750);
+            setTimeout(() => {
+                const options = { step: 4, rate: 7 };
+                accelerateHelper(400, 7, () => descelerate(null, options, () => {
+                    setControls();
+                    isEngineBusy = false;
+                }), options);
+            }, 800)
         }).catch(e => console.error('Engine start failed:', e));
-      }
-    }
-    
-    function engineStartSequence() {
-      main_guage.classList.add('ignition');
-      transmissionSwitch.disabled = true;
-      
-      setTimeout(() => {
-        soundManager.playIdleSound();
-      }, 750);
-      
-      setTimeout(() => {
-        const options = { step: 4, rate: 7 };
-        accelerateHelper(400, 7, () => descelerate(null, options, () => {
-          setControls();
-          isEngineBusy = false;
-        }), options);
-      }, 800);
     }
 }
 

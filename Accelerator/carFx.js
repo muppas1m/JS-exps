@@ -25,15 +25,23 @@ export class SoundManager {
       console.error("Audio initialization failed:", e);
     }
   }
+  async loadBufferSound(url) {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await this.ctx.decodeAudioData(arrayBuffer);
+    return audioBuffer;
+  }
   initSounds() {
     // Initialize sounds after context is created
     this.actionSounds = {
       start: this.loadSound('engine-start'),
       shift: this.loadSound('gear-shift')
     };
-    this.engineSources = {
-      idle: this.loadSound('engine-idle'),
-    };
+    this.loadBufferSound('./engineIdle.m4a').then(buffer => {
+      this.engineSources = {
+        idle: { buffer }
+      };
+    });
     this.currentEngine = null;
   }
   loadSound(id) {
@@ -101,10 +109,29 @@ export class SoundManager {
       .catch(e => console.warn("Audio play failed:", e));
   }
 
-  playIdleSound(){
-    const idle = this.engineSources.idle;
-    idle.element.playbackRate = 1.0; // Always normal speed
-    this.crossfadeToSound(idle);
+  stopIdleSound() {
+    if (this.currentEngine?.source?.stop) {
+      try {
+        this.currentEngine.source.stop();
+        this.currentEngine = null;
+      } catch (e) {
+        console.warn("Failed to stop idle sound:", e);
+      }
+    }
+  }
+
+  playIdleSound() {
+    if (!this.audioAllowed || !this.engineSources.idle?.buffer) return;
+  
+    const source = this.ctx.createBufferSource();
+    source.buffer = this.engineSources.idle.buffer;
+    source.loop = true;
+    source.connect(this.ctx.destination);
+    source.start(0);
+  
+    // Store reference to stop later if needed
+    this.currentEngine?.source?.stop?.();
+    this.currentEngine = { source };
   }
 
   calculatePlaybackRate(rpm) {
@@ -115,6 +142,23 @@ export class SoundManager {
     return Math.max(minRate, Math.min(maxRate, baseRate));
   }
   crossfadeToSound(targetSound) {
+    // Stop previous engine sound if it's a buffer-based source
+    if (this.currentEngine?.source?.stop) {
+      this.currentEngine.source.stop();
+    }
+
+    // If this is a buffer-based idle sound
+    if (targetSound.buffer) {
+      const source = this.ctx.createBufferSource();
+      source.buffer = targetSound.buffer;
+      source.loop = true;
+      source.connect(this.ctx.destination);
+      source.start(0);
+      targetSound.source = source;
+      this.currentEngine = targetSound;
+      return;
+    }
+
     if (this.currentEngine && this.currentEngine !== targetSound) {
       this.currentEngine.element.volume = 0;
     }
