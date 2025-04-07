@@ -287,9 +287,9 @@ function startStopEngine(){
         carStartAudio.play().then(() => {
             main_guage.classList.toggle('ignition');
             transmissionSwitch.disabled = true;
-            // setTimeout(() => {
-            //     soundManager.playIdleSound(); // Start with idle sound
-            // }, 750);
+            setTimeout(() => {
+                soundManager.playIdleSound(); // Start with idle sound
+            }, 750);
             setTimeout(() => {
                 const options = { step: 4, rate: 7 };
                 accelerateHelper(400, 7, () => descelerate(null, options, () => {
@@ -334,10 +334,20 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       `;
       document.body.appendChild(overlay);
-      
+
       document.getElementById('enable-audio-btn').addEventListener('click', () => {
+        const soundManager = new SoundManager();
+        
+        // Then set up other event listeners
         ignitionButton.addEventListener('click', startStopEngine);
         overlay.remove();
+        
+        // Preload audio elements on iOS
+        if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+          document.querySelectorAll('audio').forEach(audio => {
+            audio.load();
+          });
+        }
       });
     }
   });
