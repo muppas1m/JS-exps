@@ -11,15 +11,14 @@ export class SoundManager {
     this.audioAllowed = true;
     
     // Initialize sounds after context is created
+    this.actionSounds = {
+      start: this.loadSound('engine-start'),
+      shift: this.loadSound('gear-shift')
+    };
     this.engineSources = {
       idle: this.loadSound('engine-idle'),
       low: this.loadSound('engine-low'),
       high: this.loadSound('engine-high'),
-    };
-    
-    this.actionSounds = {
-      start: this.loadSound('engine-start'),
-      shift: this.loadSound('gear-shift')
     };
     
     this.currentEngine = null;

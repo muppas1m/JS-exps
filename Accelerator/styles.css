@@ -18,6 +18,8 @@ body{
     background: #000025;
     color: #BEE5EC;
     position: relative;
+    overflow-x: hidden;
+    height: auto;
 }
 .clock{
     position: relative;
@@ -79,7 +81,7 @@ body{
     width: 25px;
     height: 25px;
     background: #2C3A6A;
-    z-index: 10000;
+    z-index: 9999;
     border-radius: 50%;
 }
 .sec, .sc{
@@ -301,19 +303,6 @@ button#brake-pedal:active, button#brake-pedal.active{
 .clock.ignition .logo > img{
     opacity: 1;
 }
-@media (max-width:767px){
-    .clock{
-        position: absolute;
-        top: 33%;
-        width: 300px;
-        height: 300px;
-    }
-    .sec, .sc{
-        width: 180px;
-        height: 180px;
-        position: absolute;
-    }
-}
 #engine-button{
     width: 100px;
     height: 100px;
@@ -341,4 +330,53 @@ button#brake-pedal:active, button#brake-pedal.active{
     position: absolute;
     top: 0;
     left: 0;
+}
+
+@media (max-width:767px){
+    .clock{
+        position: absolute;
+        top: 33%;
+        width: 300px;
+        height: 300px;
+    }
+    .clock {
+        position: relative;
+        top: auto;
+        margin-top: 20px;
+      }
+    .sec, .sc{
+        width: 180px;
+        height: 180px;
+        position: absolute;
+    }
+    .controls {
+        /* position: relative; */
+        bottom: 0;
+        height: 170px;
+    }
+    #engine-button{
+        width: 70px;
+        height: 70px;
+        font-size: 0.7rem;
+    }
+    button#gas-pedal, button#brake-pedal{
+        max-width: 70px;
+    }
+      
+      /* button#gas-pedal, button#brake-pedal {
+        display: block;
+        width: 40%;
+        margin: 10px;
+      }
+      
+      #engine-button {
+        order: -1;
+        width: 60px;
+        height: 60px;
+      }
+      
+      .gear-map {
+        position: relative;
+        margin: 20px 0;
+      } */
 }

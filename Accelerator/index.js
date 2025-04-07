@@ -9,7 +9,7 @@ const gearIndicator = document.getElementById('gearIndicator');
 const speedIndicator = document.querySelector('#sc');
 const ignitionButton = document.getElementById('engine-button');
 const main_guage = document.querySelector('.clock');
-const switchContainer = document.querySelector('.switch-container');
+const carStartAudio = document.getElementById('engine-start');
 const transmissionSwitch = document.querySelector('.switch-container input');
 const switchLabel = document.querySelector('.switch-container .switch-label');
 
@@ -279,37 +279,39 @@ function unsetControls(){
     window.removeEventListener('keyup', keyUpListener);
 }
 
-ignitionButton.addEventListener('click', () => {
+function startStopEngine(){
     if (isEngineBusy || speed > 0) return;
-
     isEngineBusy = true;
 
-    if(ignition){ // when engine is already on, turn it off;
+    if (ignition) { // when engine is already on, turn it off;
         setTimeout(() => {
             soundManager.engineSources.idle.element.pause();
             main_guage.classList.toggle('ignition'),
-            isEngineBusy = false;
+                isEngineBusy = false;
         }, 500)
         transmissionSwitch.disabled = false;
         unsetControls();
-    } else{
-        main_guage.classList.toggle('ignition');
-        isAnimating = true;
-        transmissionSwitch.disabled = true;
-        soundManager.playStartSound();
-        setTimeout(() => {
-            soundManager.updateEngineSound(0, 0); // Start with idle sound
-        }, 750);
-        setTimeout(() => {
-            const options = { step: 4, rate: 7 };
-            accelerateHelper(400, 7, () => descelerate(null, options, () => {
-                setControls();
-                isAnimating = false;
-                isEngineBusy = false;
-            }), options); 
-        }, 800)
+    } else {
+        carStartAudio.volume = 1;
+        carStartAudio.play().then(() => {
+            main_guage.classList.toggle('ignition');
+            isAnimating = true;
+            transmissionSwitch.disabled = true;
+            // soundManager.playStartSound();
+            setTimeout(() => {
+                soundManager.updateEngineSound(0, 0); // Start with idle sound
+            }, 750);
+            setTimeout(() => {
+                const options = { step: 4, rate: 7 };
+                accelerateHelper(400, 7, () => descelerate(null, options, () => {
+                    setControls();
+                    isAnimating = false;
+                    isEngineBusy = false;
+                }), options);
+            }, 800)
+        }).catch(e => console.error('Engine start failed:', e));
     }
-})
+}
 
 transmissionSwitch.addEventListener('change', () => {
     if(transmissionSwitch.checked){
@@ -324,3 +326,41 @@ transmissionSwitch.addEventListener('change', () => {
     switchLabel.innerHTML = 'Automatic';
     isManualMode = false;
 })
+
+// In your index.js
+document.addEventListener('DOMContentLoaded', () => {
+    let audioEnabled = false;
+    
+    if (!audioEnabled) {
+      const overlay = document.createElement('div');
+      overlay.innerHTML = `
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+          background: rgba(0,0,40,0.9); display: flex; flex-direction: column; 
+          justify-content: center; align-items: center; z-index: 10000; color: white;">
+          <h2 style="margin-bottom: 20px;letter-spacing: 1px;">DRIVING SIMULATOR</h2>
+          <button id="enable-audio-btn" style="padding: 15px 30px; font-size: 1.2rem;
+            background: #0078d1; color: white; border: none; border-radius: 5px;">
+            CLICK TO BEGIN
+          </button>
+          <p style="margin-top: 20px; font-size: 0.8rem;">Audio requires interaction</p>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      
+      document.getElementById('enable-audio-btn').addEventListener('click', () => {
+        // Tiny silent play to enable audio
+        carStartAudio.volume = 0.001;
+        carStartAudio.play().then(() => {
+          carStartAudio.pause();
+          carStartAudio.currentTime = 0;
+          audioEnabled = true;
+          overlay.remove();
+          
+          ignitionButton.addEventListener('click', startStopEngine);
+        }).catch(e => {
+          console.error('Audio enable failed:', e);
+          overlay.querySelector('p').textContent = 'Could not enable audio. Please interact with page first.';
+        });
+      });
+    }
+  });

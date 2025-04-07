@@ -17,12 +17,21 @@
     <audio id="engine-low" loop src="./engineLow.mp3" preload="auto"></audio>
     <audio id="engine-high" loop src="./engineHigh.mp3" preload="auto"></audio>
     <audio id="gear-shift" src="./carShift.mp3" preload="auto"></audio>
+    <div class="switch-container">
+        <span class="switch-label">Automatic</span>
+        <label class="boxy-switch">
+            <input type="checkbox">
+            <span class="boxy-slider"></span>
+        </label>
+    </div>
+    <div class="gear-map">
+        <div class="container">
+            <div class="line horizontal"></div>
+        </div>
+    </div>
     <div class="clock">
         <div class="pinHolder"></div>
         <div class="logo"><img src="./bugatti.png" alt="ferrari-logo"/></div>
-        <audio id="car-start">
-            <source src="./cobra-start.mp3" type="audio/mp3" />
-        </audio>
         <div class="guage-cover">
             <span style="--i:0"><span>0</span></span>
             <span style="--j:0" class="point"><span></span></span>
@@ -66,18 +75,6 @@
             <span class="rightGears">N12</span>
         </p>
         <p id="digitalSpeed">0</p>
-    </div>
-    <div class="switch-container">
-        <span class="switch-label">Automatic</span>
-        <label class="boxy-switch">
-            <input type="checkbox">
-            <span class="boxy-slider"></span>
-        </label>
-    </div>
-    <div class="gear-map">
-        <div class="container">
-            <div class="line horizontal"></div>
-        </div>
     </div>
     <div class="controls">
         <button id="brake-pedal">|||</button>
