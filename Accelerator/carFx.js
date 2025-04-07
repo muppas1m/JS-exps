@@ -17,8 +17,8 @@ export class SoundManager {
     };
     this.engineSources = {
       idle: this.loadSound('engine-idle'),
-      low: this.loadSound('engine-low'),
-      high: this.loadSound('engine-high'),
+      // low: this.loadSound('engine-low'),
+      // high: this.loadSound('engine-high'),
     };
     
     this.currentEngine = null;
@@ -35,22 +35,22 @@ export class SoundManager {
     return { element, source };
   }
 
-  updateEngineSound(speed, gear) {
-    if (speed === 0 || gear === 'N' || gear === 'P') {
-      this.playIdleSound();
-      return;
-    }
-    // const targetSound = this.actionSounds.idle;
-    // const rpm = this.calculateRPM(speed, gear);
+  // updateEngineSound(speed, gear) {
+  //   if (speed === 0 || gear === 'N' || gear === 'P') {
+  //     this.playIdleSound();
+  //     return;
+  //   }
+  //   const targetSound = this.actionSounds.idle;
+  //   const rpm = this.calculateRPM(speed, gear);
 
-    // // Only apply playback rate to non-idle sounds
-    // if (targetSound !== this.engineSources.idle) {
-    //   const playbackRate = this.calculatePlaybackRate(rpm);
-    //   targetSound.element.playbackRate = playbackRate;
-    // }
+  //   // Only apply playback rate to non-idle sounds
+  //   if (targetSound !== this.engineSources.idle) {
+  //     const playbackRate = this.calculatePlaybackRate(rpm);
+  //     targetSound.element.playbackRate = playbackRate;
+  //   }
 
-    // this.crossfadeToSound(targetSound);
-  }
+  //   this.crossfadeToSound(targetSound);
+  // }
 
   playStartSound() {
     if (!this.audioAllowed) return;
