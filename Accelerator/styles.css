@@ -129,19 +129,31 @@ button#gas-pedal, button#brake-pedal{
     height: 180px;
     outline: none;
     cursor: pointer;
+    background: -webkit-gradient(linear, left bottom, left top, from(#4d4d4d), to(#b2b2af));
+    background: -o-linear-gradient(bottom, #4d4d4d, #b2b2af);
     background: linear-gradient(to top, #4d4d4d, #b2b2af);
+    -webkit-transition: 0.3s;
+    -o-transition: 0.3s;
     transition: 0.3s;
-    box-shadow: 0px 7px 10px 0px grey;
-    touch-action: manipulation;
+    -webkit-box-shadow: 0px 7px 10px 0px grey;
+            box-shadow: 0px 7px 10px 0px grey;
+    -ms-touch-action: manipulation;
+        touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     font-size: 5rem;
-    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0 100%);
+    -webkit-clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0 100%);
+            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0 100%);
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
-    transform-style: preserve-3d;
-    transform-origin: bottom;
+    -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+    -webkit-transform-origin: bottom;
+        -ms-transform-origin: bottom;
+            transform-origin: bottom;
     border-bottom: 10px solid rgb(126, 125, 125);
-    user-select: none;
+    -moz-user-select: none;
+     -ms-user-select: none;
+         user-select: none;
     -webkit-user-select: none;
 }
 button#brake-pedal{
@@ -149,10 +161,15 @@ button#brake-pedal{
     font-size: 3rem;
 }
 button#gas-pedal:active,button#gas-pedal.active ,button#brake-pedal:active,button#brake-pedal.active{
-    box-shadow: 0px 3px 5px 0px gray;
-    transform-origin: bottom;
-    transform: rotateX(20deg);
-    clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0 100%);
+    -webkit-box-shadow: 0px 3px 5px 0px gray;
+            box-shadow: 0px 3px 5px 0px gray;
+    -webkit-transform-origin: bottom;
+        -ms-transform-origin: bottom;
+            transform-origin: bottom;
+    -webkit-transform: rotateX(20deg);
+            transform: rotateX(20deg);
+    -webkit-clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0 100%);
+            clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0 100%);
 }
 button#gas-pedal:active, button#gas-pedal.active{
     height: 150px;
