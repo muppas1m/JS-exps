@@ -16,7 +16,7 @@ export class SoundManager {
       shift: this.loadSound('gear-shift')
     };
     this.engineSources = {
-      idle: this.loadSound('engine-idle'),
+      // idle: this.loadSound('engine-idle'),
       // low: this.loadSound('engine-low'),
       // high: this.loadSound('engine-high'),
     };
@@ -77,11 +77,11 @@ export class SoundManager {
       .catch(e => console.warn("Audio play failed:", e));
   }
 
-  playIdleSound(){
-    const idle = this.engineSources.idle;
-    idle.element.playbackRate = 1.0; // Always normal speed
-    this.crossfadeToSound(idle);
-  }
+  // playIdleSound(){
+  //   const idle = this.engineSources.idle;
+  //   idle.element.playbackRate = 1.0; // Always normal speed
+  //   this.crossfadeToSound(idle);
+  // }
 
   calculatePlaybackRate(rpm) {
     const minRate = 0.1; 

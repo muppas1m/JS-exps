@@ -287,9 +287,9 @@ function startStopEngine(){
         carStartAudio.play().then(() => {
             main_guage.classList.toggle('ignition');
             transmissionSwitch.disabled = true;
-            setTimeout(() => {
-                soundManager.playIdleSound(); // Start with idle sound
-            }, 750);
+            // setTimeout(() => {
+            //     soundManager.playIdleSound(); // Start with idle sound
+            // }, 750);
             setTimeout(() => {
                 const options = { step: 4, rate: 7 };
                 accelerateHelper(400, 7, () => descelerate(null, options, () => {
