@@ -5,7 +5,23 @@ export class SoundManager {
     this.initAudioContext = this.initAudioContext.bind(this);
     document.addEventListener('click', this.initAudioContext, { once: true });
     document.addEventListener('touchstart', this.initAudioContext, { once: true });
+
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      this.setupIOSKeepAlive();
+    }
   }
+  setupIOSKeepAlive() {
+    // Create an extremely silent oscillator to prevent audio context suspension
+    this.iosKeepAliveOscillator = this.ctx.createOscillator();
+    this.iosKeepAliveOscillator.frequency.value = 0.1; // Inaudible frequency
+    this.iosKeepAliveGain = this.ctx.createGain();
+    this.iosKeepAliveGain.gain.value = 0.0001; // Nearly silent
+    
+    this.iosKeepAliveOscillator.connect(this.iosKeepAliveGain);
+    this.iosKeepAliveGain.connect(this.ctx.destination);
+    this.iosKeepAliveOscillator.start();
+  }
+
   initAudioContext() {
     try {
       // Create audio context after user interaction
@@ -101,10 +117,47 @@ export class SoundManager {
       .catch(e => console.warn("Audio play failed:", e));
   }
 
-  playIdleSound(){
+  playIdleSound() {
+    if (!this.audioAllowed) return;
+    
     const idle = this.engineSources.idle;
-    idle.element.playbackRate = 1.0; // Always normal speed
-    this.crossfadeToSound(idle);
+    idle.element.playbackRate = 1.0;
+    
+    // iOS-specific handling
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      // Ensure context is running
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume().then(() => {
+          this.setupIOSIdleSound(idle);
+        });
+      } else {
+        this.setupIOSIdleSound(idle);
+      }
+    } else {
+      // Standard handling for other devices
+      this.crossfadeToSound(idle);
+    }
+  }
+
+  setupIOSIdleSound(idle) {
+    // iOS requires special handling for continuous playback
+    idle.element.loop = true;
+    idle.element.volume = 0.7;
+    
+    // Create a silent gain node to keep audio context alive
+    if (!this.iosKeepAliveNode) {
+      this.iosKeepAliveNode = this.ctx.createGain();
+      this.iosKeepAliveNode.gain.value = 0; // Silent
+      this.iosKeepAliveNode.connect(this.ctx.destination);
+    }
+    
+    // Play the sound and catch any errors
+    idle.element.play().catch(e => {
+      console.warn("Idle audio play failed, retrying:", e);
+      setTimeout(() => this.setupIOSIdleSound(idle), 500);
+    });
+    
+    this.currentEngine = idle;
   }
 
   calculatePlaybackRate(rpm) {
@@ -117,12 +170,22 @@ export class SoundManager {
   crossfadeToSound(targetSound) {
     if (this.currentEngine && this.currentEngine !== targetSound) {
       this.currentEngine.element.volume = 0;
+      // Don't pause on iOS - let it play silently to avoid audio context suspension
+      if (!/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        this.currentEngine.element.pause();
+      }
     }
     
     targetSound.element.volume = 0.7;
     if (targetSound.element.paused) {
       targetSound.element.currentTime = 0;
-      targetSound.element.play().catch(e => console.warn("Audio play failed:", e));
+      targetSound.element.play().catch(e => {
+        console.warn("Audio play failed:", e);
+        // On iOS, retry after a short delay
+        if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+          setTimeout(() => targetSound.element.play(), 300);
+        }
+      });
     }
     
     this.currentEngine = targetSound;

@@ -351,3 +351,14 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && soundManager && soundManager.currentEngine) {
+      // Resume audio when app comes back to foreground
+      soundManager.ctx.resume().then(() => {
+        if (soundManager.currentEngine.element.paused) {
+          soundManager.currentEngine.element.play().catch(e => console.warn("Resume failed:", e));
+        }
+      });
+    }
+  });
