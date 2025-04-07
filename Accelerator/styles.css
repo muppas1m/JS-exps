@@ -109,76 +109,66 @@ body{
     border: 1px solid rgb(155, 184, 207);
     box-sizing: content-box;
 }
-.controls{
+.controls {
     position: absolute;
     bottom: 20px;
     display: flex;
     align-items: flex-end;
     width: 100vw;
     justify-content: space-around;
-    transform-style: preserve-3d;
-    transform: rotateX(-20deg);
     user-select: none;
     -webkit-user-select: none;
-}
-button#gas-pedal, button#brake-pedal{
-    display: none;
-    position: relative;
-    width: 24%;
+    padding: 0 5vw;
+    gap: 10px;
+  }
+  
+  button#gas-pedal,
+  button#brake-pedal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24vw;
     max-width: 100px;
     height: 180px;
-    outline: none;
-    cursor: pointer;
-    background: -webkit-gradient(linear, left bottom, left top, from(#4d4d4d), to(#b2b2af));
-    background: -o-linear-gradient(bottom, #4d4d4d, #b2b2af);
     background: linear-gradient(to top, #4d4d4d, #b2b2af);
-    -webkit-transition: 0.3s;
-    -o-transition: 0.3s;
-    transition: 0.3s;
-    -webkit-box-shadow: 0px 7px 10px 0px grey;
-            box-shadow: 0px 7px 10px 0px grey;
-    -ms-touch-action: manipulation;
-        touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
+    border: none;
+    border-radius: 6px 6px 0 0;
+    border-bottom: 10px solid #7e7d7d;
+    box-shadow: 0px 7px 10px 0px grey;
     font-size: 5rem;
-    -webkit-clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0 100%);
-            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0 100%);
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    -webkit-transform-style: preserve-3d;
-            transform-style: preserve-3d;
-    -webkit-transform-origin: bottom;
-        -ms-transform-origin: bottom;
-            transform-origin: bottom;
-    border-bottom: 10px solid rgb(126, 125, 125);
-    -moz-user-select: none;
-     -ms-user-select: none;
-         user-select: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
     -webkit-user-select: none;
-}
-button#brake-pedal{
-    height: 100px !important;
+    user-select: none;
+  }
+  
+  button#brake-pedal {
+    height: 100px;
     font-size: 3rem;
-}
-button#gas-pedal:active,button#gas-pedal.active ,button#brake-pedal:active,button#brake-pedal.active{
-    -webkit-box-shadow: 0px 3px 5px 0px gray;
-            box-shadow: 0px 3px 5px 0px gray;
-    -webkit-transform-origin: bottom;
-        -ms-transform-origin: bottom;
-            transform-origin: bottom;
-    -webkit-transform: rotateX(20deg);
-            transform: rotateX(20deg);
-    -webkit-clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0 100%);
-            clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0 100%);
-}
-button#gas-pedal:active, button#gas-pedal.active{
-    height: 150px;
+  }
+  
+  button#gas-pedal:active,
+  button#gas-pedal.active,
+  button#brake-pedal:active,
+  button#brake-pedal.active {
+    box-shadow: 0px 3px 5px 0px gray;
+    transform: scaleY(0.9) rotateX(10deg);
+    border-bottom-width: 5px;
+  }
+  
+  button#gas-pedal:active,
+  button#gas-pedal.active {
+    height: 160px;
     font-size: 3.2rem;
-}
-button#brake-pedal:active, button#brake-pedal.active{
-    height: 80px !important;
+  }
+  
+  button#brake-pedal:active,
+  button#brake-pedal.active {
+    height: 80px;
     font-size: 1.7rem;
-}
+  }
 #digitalSpeed, #gearIndicator{
     position: absolute;
     margin: 0;
@@ -348,7 +338,23 @@ button#brake-pedal:active, button#brake-pedal.active{
     top: 0;
     left: 0;
 }
-
+@media (max-width: 500px) {
+    button#gas-pedal, button#brake-pedal {
+      width: 20vw;
+      max-width: none;
+      height: 140px;
+      font-size: 4rem;
+    }
+    button#brake-pedal {
+      height: 90px;
+      font-size: 2.5rem;
+    }
+    button#gas-pedal:active,
+    button#gas-pedal.active {
+      height: 120px;
+      font-size: 3rem;
+    }
+  }
 @media (max-width:767px){
     .clock{
         position: absolute;
@@ -376,9 +382,9 @@ button#brake-pedal:active, button#brake-pedal.active{
         height: 70px;
         font-size: 0.7rem;
     }
-    button#gas-pedal, button#brake-pedal{
+    /* button#gas-pedal, button#brake-pedal{
         max-width: 70px;
-    }
+    } */
       
       /* button#gas-pedal, button#brake-pedal {
         display: block;
