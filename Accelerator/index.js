@@ -19,7 +19,7 @@ const gearSequence = ['R', 'P', 'N', 1, 2, 3, 4, 5, 6, 7, 8], gearDisplayCap = 3
 // state variables
 let accelerateInterval, descelerateInterval, shiftDelayId, shiftAnimationId;
 let speed = 0, prevGear = 0, currentGear = 'P', isThrottlePressed = false;
-let ignition = false, isAnimating = false, isEngineBusy = false;
+let ignition = false, isEngineBusy = false;
 let keyDown = false, keyUp = false, isManualMode = false;
 
 const isGearChange = () => prevGear!==currentGear;
@@ -103,15 +103,10 @@ function descelerateHelper(e, step = 1, rate = 50, callback) {
     descelerateInterval = setInterval(() => {
         if(speed<=0) {
             speed = 0;
-            if(!isAnimating) soundManager.updateEngineSound(0, 0);
             clearInterval(descelerateInterval);
             return callback && callback();
         }    
         speed -= step;
-        if(!isAnimating){
-            let currgear = getCurrentGearBySpeed(speed);
-            soundManager.updateEngineSound(speed, ['N','P'].includes(currgear) ? 0 : currgear);
-        }
         renderSpeed(speed);
     }, rate);
 }
@@ -143,10 +138,6 @@ const accelerateHelper = (maxSpeed, interval, nextGearCB, options = {}) => {
             }
         }
         speed += step;
-        if(!isAnimating){
-            let currgear = getCurrentGearBySpeed(speed);
-            soundManager.updateEngineSound(speed, ['N','P'].includes(currgear) ? 0 : currgear);
-        }
         renderSpeed(speed);
     }, interval)
 }
@@ -295,17 +286,14 @@ function startStopEngine(){
         carStartAudio.volume = 1;
         carStartAudio.play().then(() => {
             main_guage.classList.toggle('ignition');
-            isAnimating = true;
             transmissionSwitch.disabled = true;
-            // soundManager.playStartSound();
             setTimeout(() => {
-                soundManager.updateEngineSound(0, 0); // Start with idle sound
+                soundManager.playIdleSound(); // Start with idle sound
             }, 750);
             setTimeout(() => {
                 const options = { step: 4, rate: 7 };
                 accelerateHelper(400, 7, () => descelerate(null, options, () => {
                     setControls();
-                    isAnimating = false;
                     isEngineBusy = false;
                 }), options);
             }, 800)
@@ -348,19 +336,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.appendChild(overlay);
       
       document.getElementById('enable-audio-btn').addEventListener('click', () => {
-        // Tiny silent play to enable audio
-        carStartAudio.volume = 0.001;
-        carStartAudio.play().then(() => {
-          carStartAudio.pause();
-          carStartAudio.currentTime = 0;
-          audioEnabled = true;
-          overlay.remove();
-          
-          ignitionButton.addEventListener('click', startStopEngine);
-        }).catch(e => {
-          console.error('Audio enable failed:', e);
-          overlay.querySelector('p').textContent = 'Could not enable audio. Please interact with page first.';
-        });
+        ignitionButton.addEventListener('click', startStopEngine);
+        overlay.remove();
       });
     }
   });
