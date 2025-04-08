@@ -337,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
         audioSwitch.checked = audioVal;
         audioToggleRoutine(audioVal);
       }
-      if(inRange(0, 100, volume)) {
+      if(typeof(volume)==='number' && inRange(0, 100, volume)) {
         audioVolume.value = volume;
         volumeLabel.innerHTML = `App Volume: ${volume}%`
       }
@@ -371,8 +371,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // set the audio settings, delay is used to load audio files in SoundManager
         setTimeout(() => {
-            const volume = Math.min(1, Math.max(0, parseFloat(audioVolume.value) / 100));
             const isMuted = !audioSwitch.checked;
+            const volume = isMuted ? 0 : Math.min(1, Math.max(0, parseFloat(audioVolume.value) / 100));
             
             Object.values(soundManager.actionSounds).forEach(({ element }) => {
                 element.muted = isMuted;
