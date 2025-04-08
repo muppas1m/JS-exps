@@ -1,6 +1,7 @@
 export class SoundManager {
   constructor() {
     this.audioAllowed = false;
+    this.idleVolume  = 1; // Add this
     // Initialize audio context on first interaction
     this.initAudioContext = this.initAudioContext.bind(this);
     document.addEventListener('click', this.initAudioContext, { once: true });
@@ -80,7 +81,6 @@ export class SoundManager {
       })
       .catch(e => {
         console.warn("Audio play failed:", e);
-        // On iOS, we might need to trigger this from a user gesture
       });
   }
 
@@ -119,19 +119,32 @@ export class SoundManager {
       }
     }
   }
-
-  playIdleSound() {
+  setIdleVolume(percent) {
+    const gain = Math.max(0, Math.min(1, percent / 100));
+    this.idleVolume = gain;
+    if (this.currentEngine?.gainNode) {
+      this.currentEngine.gainNode.gain.value = gain;
+    } else {
+      console.warn('GainNode not yet available, will apply on next idle playback.');
+    }
+  }
+  playIdleSound(volume = this.idleVolume) {
     if (!this.audioAllowed || !this.engineSources.idle?.buffer) return;
   
     const source = this.ctx.createBufferSource();
     source.buffer = this.engineSources.idle.buffer;
     source.loop = true;
-    source.connect(this.ctx.destination);
+  
+    const gainNode = this.ctx.createGain();
+    gainNode.gain.value = volume;
+  
+    source.connect(gainNode);
+    gainNode.connect(this.ctx.destination);
+  
     source.start(0);
   
-    // Store reference to stop later if needed
     this.currentEngine?.source?.stop?.();
-    this.currentEngine = { source };
+    this.currentEngine = { source, gainNode };
   }
 
   calculatePlaybackRate(rpm) {
@@ -163,7 +176,7 @@ export class SoundManager {
       this.currentEngine.element.volume = 0;
     }
     
-    targetSound.element.volume = 0.7;
+    // targetSound.element.volume = 0.7;
     if (targetSound.element.paused) {
       targetSound.element.currentTime = 0;
       targetSound.element.play().catch(e => console.warn("Audio play failed:", e));

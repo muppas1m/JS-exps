@@ -169,6 +169,78 @@ body{
     height: 80px;
     font-size: 1.7rem;
   }
+
+.overlay{
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;           
+    background: rgba(0,0,40,0.9); 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center; 
+    z-index: 10000; 
+    color: white;
+    padding: 1rem 1.5rem;
+}
+.overlay.hide{
+    display: none;
+}
+.overlay .header{
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+}
+
+#enable-audio-btn{
+    padding: 15px 30px; 
+    font-size: 1.2rem;
+    background: #0078d1; 
+    color: white; 
+    border: none; 
+    border-radius: 5px;
+    margin: 2rem 0;
+    cursor: pointer;
+}
+.audio-controls, .volume-control{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.audio-controls{
+    gap: 1.5rem;
+    margin: 0 0 0 1rem;
+    width: 100%;
+    max-width: 430px;
+    justify-content: space-between;
+}
+.volume-control{
+    gap: 0.3rem;
+}
+.overlay .instruction{
+    margin-top: 20px; 
+    font-size: 0.9rem;
+    margin: 0.15rem 0;
+}
+
+.instruction.TC{
+    font-weight: bold;
+}
+.audio.instruction{
+    margin-top: 2.5rem;
+}
+.instruction span{
+    background-color: rgba(190, 190, 190, 0.568);
+    padding: 0 0.3rem;
+    border-radius: 0.2rem;
+}
+.switch-container.audio{
+    margin: 1rem 0;
+    position: relative;
+    flex-direction: row;
+    align-items: center;
+}
 #digitalSpeed, #gearIndicator{
     position: absolute;
     margin: 0;

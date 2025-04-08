@@ -201,15 +201,15 @@ function accelerate() {
 }
 
 function keyDownListener(e){
-    if(!["ArrowUp", "Space", "ArrowDown"].includes(e.code)) return;
+    if(!["ArrowUp", "Space", "ArrowDown", "KeyW", "KeyS"].includes(e.code)) return;
     keyUp = false;
     if(!keyDown){
         keyDown = true;
-        if(e.code==="ArrowUp"){
+        if(["ArrowUp", "KeyW"].includes(e.code)){
             gasPedal.classList.add('active');
             return accelerate();
         }
-        else if(["ArrowDown", "Space"].includes(e.code)){
+        else if(["ArrowDown", "Space", "KeyS"].includes(e.code)){
             brakePedal.classList.add('active');
             return descelerate();
         }
@@ -229,8 +229,6 @@ function keyUpListener(e){
 function setControls(){
     ignition = true;
     renderGearChangeBySpeed(speed);
-    brakePedal.style.display = 'block';
-    gasPedal.style.display = 'block';
     
     // Dom element interation
     gasPedal.addEventListener('mousedown', accelerate);
@@ -253,8 +251,6 @@ function setControls(){
 function unsetControls(){
     ignition = false;
     renderGearChangeBySpeed(speed);
-    brakePedal.style.display = 'none';
-    gasPedal.style.display = 'none';
     gasPedal.removeEventListener('mousedown', accelerate);
     gasPedal.removeEventListener('touchstart', accelerate);
 
@@ -283,7 +279,6 @@ function startStopEngine(){
         transmissionSwitch.disabled = false;
         unsetControls();
     } else {
-        carStartAudio.volume = 1;
         carStartAudio.play().then(() => {
             main_guage.classList.toggle('ignition');
             transmissionSwitch.disabled = true;
@@ -320,27 +315,52 @@ document.addEventListener('DOMContentLoaded', () => {
     let audioEnabled = false;
     
     if (!audioEnabled) {
-      const overlay = document.createElement('div');
-      overlay.innerHTML = `
-        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-          background: rgba(0,0,40,0.9); display: flex; flex-direction: column; 
-          justify-content: center; align-items: center; z-index: 10000; color: white;">
-          <h2 style="margin-bottom: 20px;letter-spacing: 1px;">DRIVING SIMULATOR</h2>
-          <button id="enable-audio-btn" style="padding: 15px 30px; font-size: 1.2rem;
-            background: #0078d1; color: white; border: none; border-radius: 5px;">
-            CLICK TO BEGIN
-          </button>
-          <p style="margin-top: 20px; font-size: 0.8rem;">Audio requires interaction</p>
-        </div>
-      `;
-      document.body.appendChild(overlay);
+      const overlay = document.querySelector('.overlay');
+      const audioSwitch = document.querySelector('.switch-container.audio input');
+      const audioVolume = document.querySelector('.volume-control input');
+      const switchLabel = document.querySelector('.switch-container.audio .switch-label');
+      const volumeLabel = document.querySelector('.volume-control label');
+
+      const audioVal = JSON.parse(localStorage.getItem('audio'));
+      const volume = JSON.parse(localStorage.getItem('volume'));
+
+      function audioToggleRoutine(status){
+        let text = status ? 'Audio On' : 'Audio Off';
+        if(!status){
+            audioVolume.disabled = true
+        } else{
+            audioVolume.disabled = false
+        }
+        switchLabel.innerHTML = text;
+      }
+      if(typeof(audioVal)==='boolean') {
+        audioSwitch.checked = audioVal;
+        audioToggleRoutine(audioVal);
+      }
+      if(inRange(0, 100, volume)) {
+        audioVolume.value = volume;
+        volumeLabel.innerHTML = `App Volume: ${volume}%`
+      }
+      
+      audioSwitch.addEventListener('change', (e) => audioToggleRoutine(e.target.checked))
+
+      audioVolume.addEventListener('input', (e) => {
+        let value = e.target.value;
+        volumeLabel.innerHTML = `App Volume: ${value}%`
+      })
 
       document.getElementById('enable-audio-btn').addEventListener('click', () => {
-        const soundManager = new SoundManager();
+        localStorage.setItem('audio', audioSwitch.checked);
+        localStorage.setItem('volume', audioVolume.value);
         
-        // Then set up other event listeners
         ignitionButton.addEventListener('click', startStopEngine);
-        overlay.remove();
+        window.addEventListener('keydown', (e) => {
+            console.log(e.code);
+            if(e.code==='KeyI'){
+                startStopEngine()
+            }
+        })
+        overlay.classList.add('hide');
         
         // Preload audio elements on iOS
         if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
@@ -348,6 +368,18 @@ document.addEventListener('DOMContentLoaded', () => {
             audio.load();
           });
         }
+
+        // set the audio settings, delay is used to load audio files in SoundManager
+        setTimeout(() => {
+            const volume = Math.min(1, Math.max(0, parseFloat(audioVolume.value) / 100));
+            const isMuted = !audioSwitch.checked;
+            
+            Object.values(soundManager.actionSounds).forEach(({ element }) => {
+                element.muted = isMuted;
+                element.volume = volume;
+            });
+            soundManager.setIdleVolume(isMuted ? 0 : volume*100);
+        }, 200);
       });
     }
   });
