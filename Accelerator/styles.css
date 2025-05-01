@@ -502,6 +502,9 @@ body{
         --engine-button-size: 60px;
         --pedal-font-size: 2rem;
     }
+    .controls {
+        bottom: 60px;
+    }
   }
 @media (max-width:768px) and (min-width: 650px){
     :root{

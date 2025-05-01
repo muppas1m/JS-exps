@@ -10,65 +10,50 @@ const TEMP_UNITS = '°C';
 const ENGINE_IDLE_RPM = 1000;
 const NEUTRAL_REV_LIMIT = 8500;
 
-const loadingManager = new THREE.LoadingManager();
-loadingManager.onLoad = function() {
-    moduleInit();
-}
 var rpmParam, soundCarEngine;
-const listener = new SoundGeneratorAudioListener(new (window.AudioContext || window.webkitAudioContext)());
-EngineSoundGenerator.load(loadingManager, listener, "./audio_sim/engine_sound_generator/");
+let engineAudioReady = false;
 
-function moduleInit(){
-    soundCarEngine = new EngineSoundGenerator({
-        listener: listener,
-        parameters: {
-          // Engine configuration
-          cylinders: 4,
-          ignitionTime: 0.012,
-    
-          // Waveguide lengths
-          intakeWaveguideLength: 100,
-          exhaustWaveguideLength: 100,
-          extractorWaveguideLength: 100,
-          straightPipeWaveguideLength: 128,
-          outletWaveguideLength: 5,
-    
-          // Reflection factors
-          intakeOpenReflectionFactor: 0.01,
-          intakeClosedReflectionFactor: 0.95,
-          exhaustOpenReflectionFactor: 0.01,
-          exhaustClosedReflectionFactor: 0.95,
-          straightPipeReflectionFactor: 0.01,
-          outletReflectionFactor: 0.01,
-    
-          // Action parameter
-          action: 0.1,
+let engineReadyPromise = new Promise((resolve) => {
+    const loadingManager = new THREE.LoadingManager();
+    const listener = new SoundGeneratorAudioListener(new (window.AudioContext || window.webkitAudioContext)());
+    loadingManager.onLoad = function () {
 
-          // Muffler configuration
-          mufflerElementsLength: [10, 15, 20, 25],
-        }
-    });
-    
-    // Engine Intake Volume
-    let gainNode = soundCarEngine.gainIntake;
-    gainNode.gain.value = 0.1; // 10% better for cabin perspective
+        soundCarEngine = new EngineSoundGenerator({
+            listener: listener,
+            parameters: {
+                cylinders: 4,
+                ignitionTime: 0.012,
+                intakeWaveguideLength: 100,
+                exhaustWaveguideLength: 100,
+                extractorWaveguideLength: 100,
+                straightPipeWaveguideLength: 128,
+                outletWaveguideLength: 5,
+                intakeOpenReflectionFactor: 0.01,
+                intakeClosedReflectionFactor: 0.95,
+                exhaustOpenReflectionFactor: 0.01,
+                exhaustClosedReflectionFactor: 0.95,
+                straightPipeReflectionFactor: 0.01,
+                outletReflectionFactor: 0.01,
+                action: 0.1,
+                mufflerElementsLength: [10, 15, 20, 25],
+            }
+        });
 
-    // Engine Volume
-    gainNode = soundCarEngine.gain;
-    gainNode.gain.value = 0.5; // 50% 
+        soundCarEngine.gainIntake.gain.value = 0.1;
+        soundCarEngine.gain.gain.value = 0.5;
+        soundCarEngine.gainOutlet.gain.value = 0.05;
+        soundCarEngine.gainEngineBlockVibrations.gain.value = 1;
 
-    // Outlet Volume
-    gainNode = soundCarEngine.gainOutlet;
-    gainNode.gain.value = 0.05; // 5% for cabin 
+        rpmParam = soundCarEngine.worklet.parameters.get('rpm');
+        rpmParam.value = ENGINE_IDLE_RPM;
 
-    //Engine Block Vibrations
-    gainNode = soundCarEngine.gainEngineBlockVibrations;
-    gainNode.gain.value = 1; // 100%
+        engineAudioReady = true;
+        resolve(); // Resolve the promise when ready
+    };
 
-      // Set initial RPM value
-    rpmParam = soundCarEngine.worklet.parameters.get('rpm');
-    rpmParam.value = ENGINE_IDLE_RPM;
-}
+    // Load worklet (trigger loading)
+    EngineSoundGenerator.load(loadingManager, listener, "./audio_sim/engine_sound_generator/");
+});
 
 function startEngineAudio(){
     soundCarEngine.play();
@@ -537,7 +522,9 @@ function changeTransmissionMode(){
     isManualMode = false;
 }
 
-function updateEngineSoundConfig(appVolume){
+async function updateEngineSoundConfig(appVolume){
+    await engineReadyPromise;
+
     const volumePercent = appVolume / 100;
     let gainNode = soundCarEngine.gainIntake;
     gainNode.gain.value *= volumePercent;
@@ -595,8 +582,10 @@ function onLoadRoutine() {
 
       audioVolume.addEventListener('input', (e) => updateAppVolume(e.target.value))
 
-      document.getElementById('app-start-btn').addEventListener('click', () => {
-        updateEngineSoundConfig(audioVolume.value);
+      document.getElementById('app-start-btn').addEventListener('click', async () => {
+        await engineReadyPromise; // let load the engine audio deps
+
+        await updateEngineSoundConfig(audioVolume.value);
         // save settings
         localStorage.setItem('audio', audioSwitch.checked);
         localStorage.setItem('volume', audioVolume.value);
