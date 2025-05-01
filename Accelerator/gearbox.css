@@ -1,11 +1,11 @@
 :root {
-  --gear-box-size: 150px;
+  --gear-box-size: 80px;
   --track-begin-end-gutter: 0px;
-  --tracker-size: 20px;
+  --tracker-size: 17px;
   --tracker-color: rgb(255, 25, 0);
-  --track-width: 3px;
-  --gear-box-margin: 10px;
-  --box-container-pad: 50px;
+  --track-width: 2px;
+  --gear-box-margin: 8px;
+  --box-container-pad: 30px;
   --box-container-outline-width: 5px;
   --box-container-outline-color: #737373;
   --box-container-outline-border: var(--box-container-outline-width) solid var(--box-container-outline-color);
@@ -32,6 +32,8 @@
   position: absolute;
   user-select: none;
   -webkit-user-select: none;
+  top: 1vh;
+  right: 1vw;
 }
 
 .tracker {
@@ -76,4 +78,29 @@
 .line::after {
   content: attr(data-end);
   right: var(--gear-mark-position);
+}
+
+/* Media Queries */
+@media (max-width: 650px) {
+  :root{
+    --box-container-outline-width: 2px;
+  }
+}
+@media (max-width:1024px) and (min-width: 650px){
+  :root{
+    --gear-mark-size: 1em;
+  }
+}
+@media (min-width: 1024px){
+  :root{
+    --gear-box-size: 150px;
+    --track-begin-end-gutter: 0px;
+    --tracker-size: 20px;
+    --track-width: 3px;
+    --gear-box-margin: 10px;
+    --box-container-pad: 50px;
+    --gear-mark-size: 1.3em;
+    --box-container-outline-width: 5px;
+    --box-container-outline-border: var(--box-container-outline-width) solid var(--box-container-outline-color);
+  }
 }

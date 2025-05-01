@@ -4,10 +4,38 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    user-select: none;
 }
 :root{
     font-family: 'Roboto', sans-serif;
     font-family: 'Titillium Web', sans-serif;
+    --body-background: #000025;
+    --app-text-color: #BEE5EC;
+    --speedometer-size: 350px;
+    --gauge-background: radial-gradient(ellipse at center, #111 0%, #000 100%);
+    --main-gauge-border-width: 0.8em;
+    --secondary-gauge-border-width: 0.65em;
+    --gauge-border-color: #2C3A6A;
+    --gauge-box-shadow-color: rgba(0,255,255,0.2);
+    --gauge-center-pin-size: 1.875em;
+    --gauge-center-pin-color: #96acca;
+    --secondary-gauge-size: 250px;
+    --redline-color: 255, 0, 0; 
+    --needle-pointer-color: rgb(255, 166, 125);
+    --needle-pointer-width: 0.625em;
+    --gear-change-color: #ff6b00;
+    --pedal-gradient1: #4d4d4d;
+    --pedal-gradient2: #b2b2af;
+    --pedal-border: #7e7d7d;
+    --pedal-width: 24vw;
+    --pedal-max-width: 100px;
+    --gas-pedal-height: 160px;
+    --brake-pedal-height: 100px;
+    --gas-pedal-pressed-height: 140px;
+    --brake-pedal-pressed-height: 80px;
+    --engine-button-size: 100px;
+    --engine-btn-color: #0078d1;
+    --pedal-font-size: 5rem;
 }
 body{
     display: flex;
@@ -15,80 +43,89 @@ body{
     align-items: center;
     flex-direction: column;
     min-height: 100vh;
-    background: #000025;
-    color: #BEE5EC;
+    background: var(--body-background);
+    color: var(--app-text-color);
     position: relative;
     overflow-x: hidden;
     height: auto;
 }
+
+/* gauges container / gauge cluster */
+.guage_cluster{
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+ /* Gauge / dial */
 .clock{
     position: relative;
-    width: 350px;
-    height: 350px;
+    width: var(--speedometer-size);
+    height: var(--speedometer-size);
     display: flex;
     justify-content: center;
     align-items: center;
     background: #040935;
+    background: var(--gauge-background);
     overflow: hidden;
-    border: 15px solid #2C3A6A;
+    border: var(--main-gauge-border-width) solid var(--gauge-border-color);
+    box-shadow: 0 0 var(--main-gauge-border-width) var(--gauge-box-shadow-color);
     border-radius: 50%;
     user-select: none;
     -webkit-user-select: none;
+    font-size: 1em;
 }
+
+/* Gauge Customization */
+.clock.rpm_guage, .clock.oil-temp-guage{
+    position: absolute;
+    width: var(--secondary-gauge-size);
+    height: var(--secondary-gauge-size);
+    top: 50%;
+    left: 50%;
+    border: var(--secondary-gauge-border-width) solid var(--gauge-border-color);
+    font-size: 0.74em;
+    box-shadow: 0 0 var(--secondary-gauge-border-width) var(--gauge-box-shadow-color);
+}
+.clock.rpm_guage{
+    transform: translate(calc(var(--speedometer-size) / 2), calc(-50% + (var(--speedometer-size) - var(--secondary-gauge-size)) / 2));
+}
+.clock.oil-temp-guage{
+    font-size: 0.7em;
+    transform: translate(calc(-100% - calc(var(--speedometer-size) / 2)), calc(-50% + (var(--speedometer-size) - var(--secondary-gauge-size)) / 2 ));
+}
+
+/* Center pin styles */
 .clock::before{
     content: '';
     position: absolute;
-    width: 30px;
-    height: 30px;
-    background: #95acca;
+    width: var(--gauge-center-pin-size);
+    height: var(--gauge-center-pin-size);
+    background: var(--gauge-center-pin-color);
     z-index: 0;
     border-radius: 50%;
-}
-.pointer{
-    background: rgb(255, 81, 0);
-    /* background:#BEE5EC; */
-    width: 10px;
-    height: 30%;
-    border: 3px solid white;
-    position: absolute;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-}
-.pointer::before{
-    content: '';
-    width: 6px;
-    height: 15px;
-    position: absolute;
-    background: white;
-    top: 105%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-.pointer::after{
-    content: '';
-    width: 9px;
-    height: 9px;
-    position: absolute;
-    background: white;
-    top: 0px;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(45deg);
-    z-index: -1;
 }
 .pinHolder{
     content: '';
     position: absolute;
-    width: 25px;
-    height: 25px;
-    background: #2C3A6A;
+    width: 1.5625em;
+    height: 1.5625em;
+    background: var(--gauge-border-color);
     z-index: 9999;
     border-radius: 50%;
 }
+/* Needle base */
 .sec, .sc{
-    width: 220px;
-    height: 220px;
+    width: 13.75em;
+    height: 15em;
     position: absolute;
     opacity: 0.7;
+}
+.speedometer .sec, .speedometer .sc{
+    height: 16.8em;
 }
 .clock.ignition .sec,
 .clock.ignition .sc{
@@ -102,158 +139,186 @@ body{
 .sc::before{
     content: '';
     position: absolute;
-    border-radius: 10px;
-    width: 4px;
-    height: 62%;
-    background: #2C3A6A;
-    border: 1px solid rgb(155, 184, 207);
+    border-radius: 0.625em;
+    width: 0.25em;
+    height: 50%;
+    background: var(--gauge-border-color);
+    border: 1px solid var(--app-text-color);
     box-sizing: content-box;
 }
-.controls {
+
+/* Logo Styles */
+.logo{
     position: absolute;
-    bottom: 20px;
-    display: flex;
-    align-items: flex-end;
-    width: 100vw;
-    justify-content: space-around;
-    user-select: none;
-    -webkit-user-select: none;
-    padding: 0 5vw;
-    gap: 10px;
-  }
-  
-  button#gas-pedal,
-  button#brake-pedal {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24vw;
-    max-width: 100px;
-    height: 180px;
-    background: linear-gradient(to top, #4d4d4d, #b2b2af);
-    border: none;
-    border-radius: 6px 6px 0 0;
-    border-bottom: 10px solid #7e7d7d;
-    box-shadow: 0px 7px 10px 0px grey;
-    font-size: 5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-user-select: none;
-    user-select: none;
-  }
-  
-  button#brake-pedal {
-    height: 100px;
-    font-size: 3rem;
-  }
-  
-  button#gas-pedal:active,
-  button#gas-pedal.active,
-  button#brake-pedal:active,
-  button#brake-pedal.active {
-    box-shadow: 0px 3px 5px 0px gray;
-    transform: scaleY(0.9) rotateX(10deg);
-    border-bottom-width: 5px;
-  }
-  
-  button#gas-pedal:active,
-  button#gas-pedal.active {
-    height: 160px;
-    font-size: 3.2rem;
-  }
-  
-  button#brake-pedal:active,
-  button#brake-pedal.active {
-    height: 80px;
-    font-size: 1.7rem;
-  }
-
-.overlay{
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%;           
-    background: rgba(0,0,40,0.9); 
-    display: flex; 
-    flex-direction: column; 
-    justify-content: center; 
-    align-items: center; 
-    z-index: 10000; 
-    color: white;
-    padding: 1rem 1.5rem;
+    top: 22%;
+    opacity: 0.4;
 }
-.overlay.hide{
-    display: none;
+.logo > img{
+    height: 3.125em;
+    width: 3.125em;
+    object-fit: cover;
 }
-.overlay .header{
-    margin-bottom: 20px;
-    letter-spacing: 1px;
+.oil-temp-guage .logo{
+    width: 2.2rem;
+    height: 2.2rem;
 }
-
-#enable-audio-btn{
-    padding: 15px 30px; 
-    font-size: 1.2rem;
-    background: #0078d1; 
-    color: white; 
-    border: none; 
-    border-radius: 5px;
-    margin: 2rem 0;
-    cursor: pointer;
+.logo > img.oil_temp_icon,
+.logo > img.temperature{
+    position: absolute;
+    width: 2.2rem;
+    height: 2.2rem;
+    filter: invert(84%) sepia(24%) saturate(236%) hue-rotate(141deg) brightness(103%) contrast(89%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -70%);
 }
-.audio-controls, .volume-control{
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.logo > img.oil_temp_icon{
+    transform: rotate(-45deg);
+    transform-origin: left;
+    left: 0rem;
+    top: 0rem;
+    z-index: 11;
 }
-.audio-controls{
-    gap: 1.5rem;
-    margin: 0 0 0 1rem;
-    width: 100%;
-    max-width: 430px;
-    justify-content: space-between;
+.clock.ignition .logo{
+    opacity: 1;
 }
-.volume-control{
-    gap: 0.3rem;
-}
-.overlay .instruction{
-    margin-top: 20px; 
-    font-size: 0.9rem;
-    margin: 0.15rem 0;
-}
-
-.instruction.TC{
-    font-weight: bold;
-}
-.audio.instruction{
-    margin-top: 2.5rem;
-}
-.instruction span{
-    display: inline-block;
-    background-color: rgba(190, 190, 190, 0.568);
-    width: 1.3rem;
-    text-align: center;
-    border-radius: 0.2rem;
-}
-.switch-container.audio{
-    margin: 1rem 0;
+.rpm_guage .logo > div{
     position: relative;
-    flex-direction: row;
-    align-items: center;
+    font-weight: 800;
+    text-align: center;
+    font-size: 1.2em;
+    letter-spacing: 1px;
+    line-height: 0.8;
 }
+.rpm_guage .logo > div small{
+    letter-spacing: 0;
+    font-size: 0.7em;
+    display: inline-block;
+    margin-top: 0.3125em;
+}
+
+/* pointer styles */
+/* needle pointer styles */
+.pointer{
+    background: var(--needle-pointer-color);
+    width: var(--needle-pointer-width);
+    height: 30%;
+    border: 0.18em solid white;
+    position: absolute;
+    border-top-left-radius: var(--needle-pointer-width);
+    border-top-right-radius: var(--needle-pointer-width);
+}
+.pointer::before{
+    content: '';
+    width: 0.375em;
+    height: 0.9375em;
+    position: absolute;
+    background: white;
+    top: 105%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.pointer::after{
+    content: '';
+    width: 0.5625em;
+    height: 0.5625em;
+    position: absolute;
+    background: white;
+    top: 0px;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    z-index: -1;
+}
+
+.guage-cover{
+    width: 93%;
+    height: 93%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(-135deg);
+    z-index: 100;
+}
+
+/* Gauge Scale Marks */
+.guage-cover > span:not(.point){
+    padding: 1px;
+}
+.guage-cover > span:not(.point) > span{
+    font-weight: 700;
+    opacity: 0.2;
+    transform: rotate(calc(135deg - calc(27deg * var(--i))));
+    font-size: 1.3em;
+}
+.clock.ignition .guage-cover > span:not(.point) > span{
+    animation: print linear forwards;
+    animation-duration: calc(var(--i)*0.08s);
+}
+.guage-cover > span{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    text-align: center;
+    transform: rotate(calc(27deg * var(--i)));
+}
+.guage-cover > span.point{
+    transform: rotate(calc(27deg * var(--j)));
+}
+.guage-cover > span > span{
+    position: relative;
+    display: inline-block;
+    transform: rotate(calc(-27deg * var(--i)));
+    color: var(--app-text-color);
+    font-size: 1.3rem;
+}
+.guage-cover > span.point > span{
+    width: 0.1875em;
+    height: 1.4375em;
+    top: -1.5625em;
+    background: var(--app-text-color);
+    opacity: 0.2;
+}
+.rpm_guage .guage-cover > span.point > span, 
+.oil-temp-guage .guage-cover > span.point > span{
+    width: 0.15em;
+}
+.clock.ignition .guage-cover > span.point > span{
+    animation: print linear forwards;
+    animation-duration: calc(var(--j)*0.08s);
+}
+.guage-cover > span.point:nth-child(3n) > span:first-child{
+    width: 2.5px;
+    height: 7px;
+    z-index: -1;
+    top: -24px;
+}
+@keyframes print {
+    0%{
+        opacity: 0.2;
+        visibility: hidden;
+    }
+    99%{
+        opacity: 0.2;
+    }
+    100%{
+        visibility: visible;
+        opacity: 1;
+    }
+}
+/* Speedometer Digital Aesthetics */
 #digitalSpeed, #gearIndicator{
     position: absolute;
     margin: 0;
     left: calc(100% / 2);
     color: inherit;
-    font-size: 1.8rem;
+    font-size: 1.8em;
     top: 66%;
     left: 50%;
     transform: translate(-50%, -50%);
     font-weight: bold;
     opacity: 0.2;
+    --guage-units: ''
 }
 .clock.ignition #digitalSpeed,
 .clock.ignition #gearIndicator{
@@ -276,12 +341,12 @@ body{
     font-weight: bold;
     transition: all 0.2s ease;
     font-size: 2rem;
-    color: #BEE5EC;
+    color: var(--app-text-color);
     opacity: 1;
 }
 #gearIndicator.shift .currentGear{
     transform: scale(1.3);
-    color: #ff6b00;
+    color: var(--gear-change-color);
 }
 .leftGears{
     text-align: right; 
@@ -292,7 +357,7 @@ body{
     padding-left: 0.2rem;
 }
 #digitalSpeed::before{
-    content: 'km/h';
+    content: var(--guage-units);
     position: absolute;
     color: inherit;
     font-size: 0.75rem;
@@ -301,95 +366,114 @@ body{
     left: 50%;
     transform: translate(-50%, -50%);
 }
-.guage-cover{
-    width: 93%;
-    height: 93%;
-    position: relative;
+
+/* Redline-specific styling */
+/* Redline needle styling */
+.rpm_guage.in-redline .sc .pointer {
+    box-shadow: 0 0 10px rgba(var(--redline-color), 0.7);
+    animation: redline-pulse 0.1s infinite alternate;
+}
+
+@keyframes redline-pulse {
+    0% { background: var(--needle-pointer-color); }
+    50% { background: rgb(var(--redline-color)); }
+    100% { background: var(--needle-pointer-color); }
+}
+
+/* Redline zone background */
+.rpm_guage .guage-cover::after {
+    content: '';
+    position: absolute;
+    width: 112%;
+    height: 112%;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(var(--redline-color), 0.5) 85%, rgba(var(--redline-color), 0.5) 100%);
+    clip-path: polygon(50% 50%, 100% 150%, 100% 0%, 100% 100%, 50% 100%);
+    transform: rotate(calc(26deg * 8.5 - 132deg));
+    border-radius: 50%;
+}
+/* redline scale marks */
+.redline-marker {
+    opacity: 0.5;
+    color: rgb(var(--redline-color)) !important;
+}
+.rpm_guage.ignition .redline-marker{
+    text-shadow: 0 0 5px rgba(var(--redline-color), 0.7);
+    font-weight: bolder !important;
+}
+
+.redline-point > span {
+    background: rgb(var(--redline-color)) !important;
+    box-shadow: 0 0 3px rgba(var(--redline-color), 0.7);
+}
+
+/* Pedals / Controls */
+.controls {
+    position: absolute;
+    bottom: 20px;
+    display: flex;
+    align-items: flex-end;
+    width: 100vw;
+    justify-content: space-around;
+    user-select: none;
+    -webkit-user-select: none;
+    padding: 0 5vw;
+    gap: 10px;
+  }
+  
+  button#gas-pedal,
+  button#brake-pedal {
     display: flex;
     align-items: center;
     justify-content: center;
-    transform: rotate(-135deg);
-    z-index: 100;
-}
-.guage-cover > span:not(.point){
-    padding: 3px;
-}
-.guage-cover > span:not(.point) > span{
-    font-weight: 700;
-    opacity: 0.2;
-    transform: rotate(calc(135deg - calc(27deg * var(--i))));
-}
-.clock.ignition .guage-cover > span:not(.point) > span{
-    animation: print linear forwards;
-    animation-duration: calc(var(--i)*0.08s);
-}
-.guage-cover > span{
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    text-align: center;
-    transform: rotate(calc(27deg * var(--i)));
-}
-.guage-cover > span.point{
-    transform: rotate(calc(27deg * var(--j)));
-}
-.guage-cover > span > span{
-    position: relative;
-    display: inline-block;
-    transform: rotate(calc(-27deg * var(--i)));
-    color: #BEE5EC;
-    font-size: 1.3rem;
-}
-.guage-cover > span.point > span{
-    width: 3px;
-    height: 23px;
-    top: -25px;
-    background: #BEE5EC;
-    opacity: 0.2;
-}
-.clock.ignition .guage-cover > span.point > span{
-    animation: print linear forwards;
-    animation-duration: calc(var(--j)*0.08s);
-}
-.guage-cover > span.point:nth-child(3n) > span:first-child{
-    background: #7facb4;
-    width: 2.5px;
-    height: 7px;
-    z-index: -1;
-    top: -23px;
-}
-@keyframes print {
-    0%{
-        opacity: 0.2;
-        visibility: hidden;
-    }
-    99%{
-        opacity: 0.2;
-    }
-    100%{
-        visibility: visible;
-        opacity: 1;
-    }
-}
-.logo{
-    position: absolute;
-    top: 22%;
-}
-.logo > img{
-    height: 50px;
-    width: 50px;
-    object-fit: cover;
-    opacity: 0.5;
-}
-.clock.ignition .logo > img{
-    opacity: 1;
-}
-#engine-button{
-    width: 100px;
-    height: 100px;
+    width: var(--pedal-width);
+    max-width: var(--pedal-max-width);
+    height: var(--gas-pedal-height);
+    background: linear-gradient(to top, var(--pedal-gradient1), var(--pedal-gradient2));
+    border: none;
+    border-radius: 6px 6px 0 0;
+    border-bottom: 2px solid var(--pedal-border);
+    box-shadow: 0px 7px 10px 0px var(--pedal-border);
+    font-size: var(--pedal-font-size);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+    transform-origin: bottom;
+  }
+  
+  button#brake-pedal {
+    height: var(--brake-pedal-height);
+  }
+  
+  button#gas-pedal:active,
+  button#gas-pedal.active,
+  button#brake-pedal:active,
+  button#brake-pedal.active {
+      box-shadow: 0px 3px 5px 0px #7e7d7d;
+      transform: scaleY(0.9) rotateX(10deg);
+      border-bottom: 10px solid #7e7d7d;
+  }
+  
+  button#gas-pedal:active,
+  button#gas-pedal.active {
+    height: var(--gas-pedal-pressed-height);
+    font-size: 3.2rem;
+  }
+  
+  button#brake-pedal:active,
+  button#brake-pedal.active {
+    height: var(--brake-pedal-pressed-height);
+    font-size: 1.7rem;
+  }
+
+  #engine-button{
+    width: var(--engine-button-size);
+    height: var(--engine-button-size);
     border-radius: 50%;
-    border: 5px solid silver;
-    background: #0078d1;
+    border: 5px solid var(--pedal-gradient2);
+    background: var(--engine-btn-color);
     color: #fff;
     cursor: pointer;
     outline: none;
@@ -402,78 +486,63 @@ body{
     opacity: 0.7;
     pointer-events: none;
 }
-/* override current gear-map or other CSS styles  */
-.gear-map{
-    top: 0;
-    right: 0;
-}
-.switch-container{
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-@media (max-width: 500px) {
-    button#gas-pedal, button#brake-pedal {
-      width: 20vw;
-      max-width: none;
-      height: 140px;
-      font-size: 4rem;
-    }
-    button#brake-pedal {
-      height: 90px;
-      font-size: 2.5rem;
-    }
-    button#gas-pedal:active,
-    button#gas-pedal.active {
-      height: 120px;
-      font-size: 3rem;
+
+/* Media Queries */
+@media (max-width: 650px) {
+    :root{
+        font-size: 7.5px;
+        --speedometer-size: 200px;
+        --secondary-gauge-size: 100px;
+        --pedal-width: 18vw;
+        --pedal-max-width: 60px;
+        --gas-pedal-height: 90px;
+        --brake-pedal-height: 60px;
+        --gas-pedal-pressed-height: 60px;
+        --brake-pedal-pressed-height: 40px;
+        --engine-button-size: 60px;
+        --pedal-font-size: 2rem;
     }
   }
-@media (max-width:767px){
-    .clock{
-        position: absolute;
-        top: 33%;
-        width: 300px;
-        height: 300px;
+@media (max-width:768px) and (min-width: 650px){
+    :root{
+        font-size: 12px;
+        --speedometer-size: 270px;
+        --secondary-gauge-size: 170px;
+        --pedal-width: 18vw;
+        --pedal-max-width: 60px;
+        --gas-pedal-height: 110px;
+        --brake-pedal-height: 60px;
+        --gas-pedal-pressed-height: 80px;
+        --brake-pedal-pressed-height: 40px;
+        --engine-button-size: 70px;
+        --pedal-font-size: 3rem;
     }
     .clock {
         position: relative;
         top: auto;
-        margin-top: 20px;
       }
     .sec, .sc{
-        width: 180px;
-        height: 180px;
         position: absolute;
     }
     .controls {
-        /* position: relative; */
-        bottom: 0;
-        height: 170px;
+        bottom: 10px;
     }
     #engine-button{
-        width: 70px;
-        height: 70px;
         font-size: 0.7rem;
     }
-    /* button#gas-pedal, button#brake-pedal{
-        max-width: 70px;
-    } */
-      
-      /* button#gas-pedal, button#brake-pedal {
-        display: block;
-        width: 40%;
-        margin: 10px;
-      }
-      
-      #engine-button {
-        order: -1;
-        width: 60px;
-        height: 60px;
-      }
-      
-      .gear-map {
-        position: relative;
-        margin: 20px 0;
-      } */
+}
+@media (max-width: 1399px) and (min-width: 768px){
+    :root{
+        font-size: 14px;
+        --speedometer-size: 300px;
+        --secondary-gauge-size: 200px;
+        --pedal-width: 20vw;
+        --pedal-max-width: 80px;
+        --gas-pedal-height: 140px;
+        --brake-pedal-height: 80px;
+        --gas-pedal-pressed-height: 120px;
+        --brake-pedal-pressed-height: 60px;
+        --engine-button-size: 80px;
+        --pedal-font-size: 4rem;
+    }
 }

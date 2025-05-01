@@ -1,12 +1,13 @@
 export class GearShifter {
   constructor(containerElement, options = {}) {
     // Configuration options with default
+    const computedStyles = window.getComputedStyle(document.documentElement);
     this.config = {
-      gearBoxSize: '150px',
-      trackBeginEndGutter: '0px',
-      trackerSize: '20px',
+      gearBoxSize: computedStyles.getPropertyValue('--gear-box-size'),
+      trackBeginEndGutter: computedStyles.getPropertyValue('--track-begin-end-gutter'),
+      trackerSize: computedStyles.getPropertyValue('--tracker-size'),
       trackerColor: 'rgb(255, 25, 0)',
-      trackWidth: '3px',
+      trackWidth: computedStyles.getPropertyValue('--track-width'),
       gearSequence: ['R', 'P', 'N', '1', '2', '3', '4', '5', '6', '7', '8'],
       lines: ['RP', '12', '34', '56', '78'],
       hLine: 'CD',
@@ -35,6 +36,10 @@ export class GearShifter {
       gearChange: []
     };
 
+    this.timeOut = undefined;
+    this.prevWindowWidth = undefined;
+    // this.handleWindowResize();
+
     // Initialize shifter
     this.initializeStyles();
     this.initializeLines();
@@ -57,13 +62,6 @@ export class GearShifter {
   }
   
   initializeStyles() {
-    // Set CSS variables
-    this.container.style.setProperty('--gear-box-size', this.config.gearBoxSize);
-    this.container.style.setProperty('--track-begin-end-gutter', this.config.trackBeginEndGutter);
-    this.container.style.setProperty('--tracker-size', this.config.trackerSize);
-    this.container.style.setProperty('--tracker-color', this.config.trackerColor);
-    this.container.style.setProperty('--track-width', this.config.trackWidth);
-    
     // Set tracker initial position
     this.tracker.style.position = 'absolute';
     this.tracker.style.borderRadius = '50%';
@@ -136,8 +134,7 @@ export class GearShifter {
     }
   }
 
-  moveToGear(targetGear) {
-    if(targetGear && targetGear === this.currentGear) return;
+  setGearPosition(targetGear){
     if(this.currentGear!==undefined){
       this.moveThroughNeutral(targetGear);
     }
@@ -147,6 +144,11 @@ export class GearShifter {
       this.tracker.style.top = `${targetPoint.y}px`;
       this.updateGear(targetGear);
     }
+  }
+
+  moveToGear(targetGear) {
+    if(targetGear && targetGear === this.currentGear) return;
+    this.setGearPosition(targetGear);
   }
 
   // Internal methods
@@ -238,6 +240,28 @@ export class GearShifter {
     }, { dist: Infinity, center: null }).center;
   }
 
+  debounced(){
+    clearTimeout(this.timeOut);
+    this.timeOut = setTimeout(this.handleWindowResize, 200);
+  }
+
+  handleWindowResize(){
+    if(this.prevWindowWidth === window.innerWidth) return;
+    this.prevWindowWidth = window.innerWidth;
+    const computedStyles = window.getComputedStyle(document.documentElement);
+
+    this.config = {
+      ...this.config,
+      gearBoxSize : computedStyles.getPropertyValue('--gear-box-size'),
+      trackBeginEndGutter: computedStyles.getPropertyValue('--track-begin-end-gutter'),
+      trackerSize: computedStyles.getPropertyValue('--tracker-size'),
+      trackWidth: computedStyles.getPropertyValue('--track-width')
+    }
+    this.container.innerHTML = '<div class="line horizontal"></div>';
+    this.initializeLines();
+    this.setGearPosition(this.currentGear);
+  }
+
   setupEventListeners() {
     // Mouse/touch event handlers
     this.tracker.addEventListener('mousedown', (e) => {
@@ -283,6 +307,10 @@ export class GearShifter {
       this.isDragging = false;
       this.handleDragEnd();
     });
+
+    window.addEventListener('resize', () => {
+      this.debounced();
+    })
   }
 
   handleDrag(mouseX, mouseY) {
@@ -338,7 +366,6 @@ export class GearShifter {
 
     const newGear = snapPoint?.node || 'N';
     this.updateGear(newGear);
-    // console.log('current gear is: ', this.currentGear);
   }
 
   // Geometric calculations

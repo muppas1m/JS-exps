@@ -1,7 +1,6 @@
 :root {
     --bg-color: #1a1a1a;
     --switch-bg: #333;
-    --switch-active: #0078d1;
     --switch-handle: #f0f0f0;
     --border-color: #555;
 }
@@ -14,8 +13,8 @@
 }
 
 .switch-label {
-    color: #ddd;
-    font-weight: 500;
+    color: var(--app-text-color);
+    font-weight: 600;
     font-size: 1rem;
 }
 
@@ -42,7 +41,7 @@
     background-color: var(--switch-bg);
     border: 2px solid var(--border-color);
     transition: .2s;
-    box-shadow: 0 2px 4px #0078d1;
+    box-shadow: 0 2px 4px var(--engine-btn-color);
 }
 
 .boxy-slider:before {
@@ -57,8 +56,8 @@
 }
 
 input:checked + .boxy-slider {
-    background-color: var(--switch-active);
-    border-color: var(--switch-active);
+    background-color: var(--engine-btn-color);
+    border-color: var(--engine-btn-color);
 }
 
 input:checked + .boxy-slider:before {
@@ -70,7 +69,7 @@ input:checked + .boxy-slider:before {
 }
 
 input:focus + .boxy-slider {
-    box-shadow: 0 0 0 2px #0078d1;
+    box-shadow: 0 0 0 2px var(--engine-btn-color);
 }
 
 input:disabled + .boxy-slider {

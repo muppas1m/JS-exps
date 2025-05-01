@@ -6,16 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="./gearbox.css">
     <link rel="stylesheet" href="./customSwitch.css">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="./overlay.css">
     <script type="module" src="./gearShifter.js" type="text/javascript" defer></script>
     <script type="module" src="./index.js" type="text/javascript" defer></script>
     <title>Speed Simulator</title>
 </head>
 <body>
     <audio id="engine-start" src="./engineStart.m4a" preload="auto" playsinline></audio>
-    <audio id="engine-idle" src="./engineIdle.m4a" loop preload="auto" playsinline webkit-playsinline></audio>
     <audio id="gear-shift" src="./carShift.m4a" preload="auto" playsinline></audio>
     <div class="switch-container">
         <span class="switch-label">Automatic</span>
@@ -29,52 +29,28 @@
             <div class="line horizontal"></div>
         </div>
     </div>
-    <div class="clock">
-        <div class="pinHolder"></div>
-        <div class="logo"><img src="./bugatti.png" alt="ferrari-logo"/></div>
-        <div class="guage-cover">
-            <span style="--i:0"><span>0</span></span>
-            <span style="--j:0" class="point"><span></span></span>
-            <span style="--j:0.5" class="point"><span></span></span>
-            <span style="--i:1"><span>40</span></span>
-            <span style="--j:1" class="point"><span></span></span>
-            <span style="--j:1.5" class="point"><span></span></span>
-            <span style="--i:2"><span>80</span></span>
-            <span style="--j:2" class="point"><span></span></span>
-            <span style="--j:2.5" class="point"><span></span></span>
-            <span style="--i:3"><span>120</span></span>
-            <span style="--j:3" class="point"><span></span></span>
-            <span style="--j:3.5" class="point"><span></span></span>
-            <span style="--i:4"><span>160</span></span>
-            <span style="--j:4" class="point"><span></span></span>
-            <span style="--j:4.5" class="point"><span></span></span>
-            <span style="--i:5"><span>200</span></span>
-            <span style="--j:5" class="point"><span></span></span>
-            <span style="--j:5.5" class="point"><span></span></span>
-            <span style="--i:6"><span>240</span></span>
-            <span style="--j:6" class="point"><span></span></span>
-            <span style="--j:6.5" class="point"><span></span></span>
-            <span style="--i:7"><span>280</span></span>
-            <span style="--j:7" class="point"><span></span></span>
-            <span style="--j:7.5" class="point"><span></span></span>
-            <span style="--i:8"><span>320</span></span>
-            <span style="--j:8" class="point"><span></span></span>
-            <span style="--j:8.5" class="point"><span></span></span>
-            <span style="--i:9"><span>360</span></span>
-            <span style="--j:9" class="point"><span></span></span>
-            <span style="--j:9.5" class="point"><span></span></span>
-            <span style="--i:10"><span>400</span></span>
-            <span style="--j:10" class="point"><span></span></span>
-            <div class="sec">
-                <div class="sc" id="sc"><div class="pointer"></div></div>
+    <div class="guage_cluster">
+        <div class="clock speedometer">
+            <div class="logo"><img src="./bugatti.png" alt="ferrari-logo"/></div>
+            <p id="gearIndicator">
+                <span class="leftGears">R</span>
+                <span class="currentGear">P</span>
+                <span class="rightGears">N12</span>
+            </p>
+        </div>
+        <div class="clock rpm_guage">
+            <div class="logo">
+                <div>
+                    <div>RPM</div>
+                    <small>x 1000</small>
+                </div>
             </div>
         </div>
-        <p id="gearIndicator">
-            <span class="leftGears">R</span>
-            <span class="currentGear">P</span>
-            <span class="rightGears">N12</span>
-        </p>
-        <p id="digitalSpeed">0</p>
+        <div class="clock oil-temp-guage">
+            <div class="logo">
+                <img src="./images/temperature.svg" class="temperature" alt="temp" />
+            </div>
+        </div>
     </div>
     <div class="controls">
         <button id="brake-pedal">|||</button>
@@ -88,12 +64,12 @@
             <p class="instruction">• Press the 'ENGINE' button to start/stop the engine or simply press the key <span>I</span>.</p>
             <p class="instruction">• Press the GAS / BRAKE pedals to change the speed of the vehicle.</p>
             <p class="instruction">• You can also use the arrow keys: <span>↑</span>, <span>↓</span> or <span>W</span>, <span>S</span> to accelerate & slow down.</p>
-            <p class="instruction">• Transmission mode can be toggled between Automatic & Manual when the engine is turned off.</p>
+            <p class="instruction">• Transmission mode can be toggled between Automatic & Manual when the engine is turned off, use <span>M</span>.</p>
             <p class="instruction">• When in 'Automatic' mode, you just have to press the GAS / BRAKE to control the speed.</p>
             <p class="instruction">• When in 'Manual' mode, you need to change the gear manually by drag & drop the tracker into the respective gear.</p>
             <p class="instruction">• The transmission map is a two way communication source in this app.</p>
             <p class="instruction">• Gear profiles and shift timing considered in this project are of Bugatti Chiron's. more profiles will be added in future.</p>
-            <p class="instruction TC">• This is not a commercial project or app and can be considered as educational or personal project.</p>
+            <p class="instruction TC">• This is an educational project and should not be considered as commercial.</p>
         </div>
         <p class="audio instruction"> With audio, this project can be experienced in a better way.</p>
         <div class="audio-controls">
@@ -109,9 +85,10 @@
                 <label>App Volume: 20%</label>
             </div>
         </div>
-        <button id="enable-audio-btn" >
+        <button id="app-start-btn" >
             CLICK TO BEGIN
         </button>
     </div>
+    <div id="canvas"></div>
 </body>
 </html>
