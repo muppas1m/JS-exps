@@ -15,7 +15,7 @@
 .switch-label {
     color: var(--app-text-color);
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 12px;
 }
 
 .boxy-switch {

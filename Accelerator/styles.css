@@ -18,10 +18,10 @@
     --gauge-border-color: #2C3A6A;
     --gauge-box-shadow-color: rgba(0,255,255,0.2);
     --gauge-center-pin-size: 1.875em;
-    --gauge-center-pin-color: #96acca;
+    --gauge-center-pin-color: #BEE5EC;
     --secondary-gauge-size: 250px;
     --redline-color: 255, 0, 0; 
-    --needle-pointer-color: rgb(255, 166, 125);
+    --needle-pointer-color: #BEE5EC;
     --needle-pointer-width: 0.625em;
     --gear-change-color: #ff6b00;
     --pedal-gradient1: #4d4d4d;
@@ -35,7 +35,7 @@
     --brake-pedal-pressed-height: 80px;
     --engine-button-size: 100px;
     --engine-btn-color: #0078d1;
-    --pedal-font-size: 5rem;
+    --pedal-font-size: 4rem;
 }
 body{
     display: flex;
@@ -76,7 +76,7 @@ body{
     border-radius: 50%;
     user-select: none;
     -webkit-user-select: none;
-    font-size: 1em;
+    font-size: 0.92em;
 }
 
 /* Gauge Customization */
@@ -87,14 +87,14 @@ body{
     top: 50%;
     left: 50%;
     border: var(--secondary-gauge-border-width) solid var(--gauge-border-color);
-    font-size: 0.74em;
+    font-size: 0.7em;
     box-shadow: 0 0 var(--secondary-gauge-border-width) var(--gauge-box-shadow-color);
 }
 .clock.rpm_guage{
     transform: translate(calc(var(--speedometer-size) / 2), calc(-50% + (var(--speedometer-size) - var(--secondary-gauge-size)) / 2));
 }
 .clock.oil-temp-guage{
-    font-size: 0.7em;
+    font-size: 0.65em;
     transform: translate(calc(-100% - calc(var(--speedometer-size) / 2)), calc(-50% + (var(--speedometer-size) - var(--secondary-gauge-size)) / 2 ));
 }
 
@@ -142,7 +142,7 @@ body{
     border-radius: 0.625em;
     width: 0.25em;
     height: 50%;
-    background: var(--gauge-border-color);
+    background: var(--app-text-color);
     border: 1px solid var(--app-text-color);
     box-sizing: content-box;
 }
@@ -203,7 +203,7 @@ body{
     background: var(--needle-pointer-color);
     width: var(--needle-pointer-width);
     height: 30%;
-    border: 0.18em solid white;
+    border: 0.18em solid var(--app-text-color);
     position: absolute;
     border-top-left-radius: var(--needle-pointer-width);
     border-top-right-radius: var(--needle-pointer-width);
@@ -213,7 +213,7 @@ body{
     width: 0.375em;
     height: 0.9375em;
     position: absolute;
-    background: white;
+    background: var(--app-text-color);
     top: 105%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -223,7 +223,7 @@ body{
     width: 0.5625em;
     height: 0.5625em;
     position: absolute;
-    background: white;
+    background: var(--app-text-color);
     top: 0px;
     left: 50%;
     transform: translate(-50%, -50%) rotate(45deg);
@@ -490,20 +490,26 @@ body{
 /* Media Queries */
 @media (max-width: 650px) {
     :root{
-        font-size: 7.5px;
+        font-size: 8.5px;
         --speedometer-size: 200px;
         --secondary-gauge-size: 100px;
         --pedal-width: 18vw;
         --pedal-max-width: 60px;
         --gas-pedal-height: 90px;
         --brake-pedal-height: 60px;
-        --gas-pedal-pressed-height: 60px;
-        --brake-pedal-pressed-height: 40px;
+        --gas-pedal-pressed-height: 75px;
+        --brake-pedal-pressed-height: 50px;
         --engine-button-size: 60px;
-        --pedal-font-size: 2rem;
+        --pedal-font-size: 2.5rem;
     }
     .controls {
-        bottom: 60px;
+        bottom: 15%;
+    }
+    .clock.rpm_guage .sec, .clock.rpm_guage .sc{
+        height: 13em;
+    }
+    .clock.oil-temp-guage .sec, .clock.oil-temp-guage .sc{
+        height: 11em;
     }
   }
 @media (max-width:768px) and (min-width: 650px){
@@ -546,6 +552,6 @@ body{
         --gas-pedal-pressed-height: 120px;
         --brake-pedal-pressed-height: 60px;
         --engine-button-size: 80px;
-        --pedal-font-size: 4rem;
+        --pedal-font-size: 3rem;
     }
 }
