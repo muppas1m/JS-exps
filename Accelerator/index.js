@@ -79,7 +79,7 @@ function stopEngineAudio(){
 }
 
 import { SoundManager } from "./carFx.js";
-import { GearShifter } from "./GearShifter.js";
+import { GearShifter } from "./gearShifter.js";
 import { createManagedInterval } from "./utils.js";
 import { Gauge } from "./Guage.js";
 
