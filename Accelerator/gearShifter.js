@@ -258,6 +258,10 @@ export class GearShifter {
       trackWidth: computedStyles.getPropertyValue('--track-width')
     }
     this.container.innerHTML = '<div class="line horizontal"></div>';
+    this.tracker = document.createElement('div');
+    this.tracker.className = 'tracker';
+    this.container.appendChild(this.tracker);
+    this.initializeStyles();
     this.initializeLines();
     this.setGearPosition(this.currentGear);
   }

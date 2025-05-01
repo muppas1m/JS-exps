@@ -11,49 +11,71 @@ const ENGINE_IDLE_RPM = 1000;
 const NEUTRAL_REV_LIMIT = 8500;
 
 var rpmParam, soundCarEngine;
-let engineAudioReady = false;
+let engineReadyPromise = false;
 
-let engineReadyPromise = new Promise((resolve) => {
-    const loadingManager = new THREE.LoadingManager();
-    const listener = new SoundGeneratorAudioListener(new (window.AudioContext || window.webkitAudioContext)());
-    loadingManager.onLoad = function () {
+async function initEngineAudioIfNeeded() {
+    if (engineReadyPromise) return engineReadyPromise;
 
-        soundCarEngine = new EngineSoundGenerator({
-            listener: listener,
-            parameters: {
-                cylinders: 4,
-                ignitionTime: 0.012,
-                intakeWaveguideLength: 100,
-                exhaustWaveguideLength: 100,
-                extractorWaveguideLength: 100,
-                straightPipeWaveguideLength: 128,
-                outletWaveguideLength: 5,
-                intakeOpenReflectionFactor: 0.01,
-                intakeClosedReflectionFactor: 0.95,
-                exhaustOpenReflectionFactor: 0.01,
-                exhaustClosedReflectionFactor: 0.95,
-                straightPipeReflectionFactor: 0.01,
-                outletReflectionFactor: 0.01,
-                action: 0.1,
-                mufflerElementsLength: [10, 15, 20, 25],
+    engineReadyPromise = new Promise((resolve, reject) => {
+        const resumeCtx = () => {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume().then(() => loadEngineSound(audioCtx, resolve, reject));
+            } else {
+                loadEngineSound(audioCtx, resolve, reject);
             }
-        });
+        };
 
-        soundCarEngine.gainIntake.gain.value = 0.1;
-        soundCarEngine.gain.gain.value = 0.5;
-        soundCarEngine.gainOutlet.gain.value = 0.05;
-        soundCarEngine.gainEngineBlockVibrations.gain.value = 1;
+        // Wait for user interaction
+        document.addEventListener('click', resumeCtx, { once: true });
+        document.addEventListener('touchstart', resumeCtx, { once: true });
+    });
 
-        rpmParam = soundCarEngine.worklet.parameters.get('rpm');
-        rpmParam.value = ENGINE_IDLE_RPM;
+    return engineReadyPromise;
+}
 
-        engineAudioReady = true;
-        resolve(); // Resolve the promise when ready
+function loadEngineSound(audioCtx, resolve, reject) {
+    const listener = new SoundGeneratorAudioListener(audioCtx);
+
+    const loadingManager = new THREE.LoadingManager();
+    loadingManager.onLoad = function () {
+        try {
+            soundCarEngine = new EngineSoundGenerator({
+                listener: listener,
+                parameters: {
+                    cylinders: 4,
+                    ignitionTime: 0.012,
+                    intakeWaveguideLength: 100,
+                    exhaustWaveguideLength: 100,
+                    extractorWaveguideLength: 100,
+                    straightPipeWaveguideLength: 128,
+                    outletWaveguideLength: 5,
+                    intakeOpenReflectionFactor: 0.01,
+                    intakeClosedReflectionFactor: 0.95,
+                    exhaustOpenReflectionFactor: 0.01,
+                    exhaustClosedReflectionFactor: 0.95,
+                    straightPipeReflectionFactor: 0.01,
+                    outletReflectionFactor: 0.01,
+                    action: 0.1,
+                    mufflerElementsLength: [10, 15, 20, 25],
+                }
+            });
+
+            soundCarEngine.gainIntake.gain.value = 0.1;
+            soundCarEngine.gain.gain.value = 0.5;
+            soundCarEngine.gainOutlet.gain.value = 0.05;
+            soundCarEngine.gainEngineBlockVibrations.gain.value = 1;
+
+            rpmParam = soundCarEngine.worklet.parameters.get('rpm');
+            rpmParam.value = ENGINE_IDLE_RPM;
+
+            resolve();
+        } catch (err) {
+            reject(err);
+        }
     };
-
-    // Load worklet (trigger loading)
     EngineSoundGenerator.load(loadingManager, listener, "./audio_sim/engine_sound_generator/");
-});
+}
 
 function startEngineAudio(){
     soundCarEngine.play();
@@ -522,9 +544,7 @@ function changeTransmissionMode(){
     isManualMode = false;
 }
 
-async function updateEngineSoundConfig(appVolume){
-    await engineReadyPromise;
-
+function updateEngineSoundConfig(appVolume){
     const volumePercent = appVolume / 100;
     let gainNode = soundCarEngine.gainIntake;
     gainNode.gain.value *= volumePercent;
@@ -583,9 +603,9 @@ function onLoadRoutine() {
       audioVolume.addEventListener('input', (e) => updateAppVolume(e.target.value))
 
       document.getElementById('app-start-btn').addEventListener('click', async () => {
-        await engineReadyPromise; // let load the engine audio deps
+        await initEngineAudioIfNeeded(); // let load the engine audio deps
 
-        await updateEngineSoundConfig(audioVolume.value);
+        updateEngineSoundConfig(audioVolume.value);
         // save settings
         localStorage.setItem('audio', audioSwitch.checked);
         localStorage.setItem('volume', audioVolume.value);
