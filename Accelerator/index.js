@@ -15,7 +15,7 @@ loadingManager.onLoad = function() {
     moduleInit();
 }
 var rpmParam, soundCarEngine;
-const listener = new SoundGeneratorAudioListener(new AudioContext());
+const listener = new SoundGeneratorAudioListener(new (window.AudioContext || window.webkitAudioContext)());
 EngineSoundGenerator.load(loadingManager, listener, "./audio_sim/engine_sound_generator/");
 
 function moduleInit(){

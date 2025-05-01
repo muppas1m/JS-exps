@@ -242,7 +242,7 @@ export class GearShifter {
 
   debounced(){
     clearTimeout(this.timeOut);
-    this.timeOut = setTimeout(this.handleWindowResize, 200);
+    this.timeOut = setTimeout(() => this.handleWindowResize(), 200);
   }
 
   handleWindowResize(){
