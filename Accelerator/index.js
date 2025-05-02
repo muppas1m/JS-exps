@@ -605,7 +605,7 @@ function onLoadRoutine() {
       document.getElementById('app-start-btn').addEventListener('click', async () => {
         await initEngineAudioIfNeeded(); // let load the engine audio deps
 
-        updateEngineSoundConfig(audioVolume.value);
+        updateEngineSoundConfig(audioSwitch.checked ? audioVolume.value : 0);
         // save settings
         localStorage.setItem('audio', audioSwitch.checked);
         localStorage.setItem('volume', audioVolume.value);

@@ -441,6 +441,7 @@ body{
     -webkit-user-select: none;
     user-select: none;
     transform-origin: bottom;
+    color: #000;
   }
   
   button#brake-pedal {
