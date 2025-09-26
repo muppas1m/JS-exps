@@ -13,3 +13,5 @@
 // 13. injection and love symbol animation
 // 14. Snake and ladder with animations for snake and ladder 
 // 15. Material UI Asynchronous Auto Complete
+// 16. asynchronous slider check box with aync status included - (red/green while changing state)
+// 17. https://www.adidas.com/us/confirmed . adidas title shadow animation
