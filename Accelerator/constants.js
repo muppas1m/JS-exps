@@ -1,0 +1,1 @@
+export const gearStickMoveDelay = 150;

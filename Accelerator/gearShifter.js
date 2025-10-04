@@ -1,3 +1,5 @@
+import { gearStickMoveDelay } from "./constants.js";
+
 export class GearShifter {
   constructor(containerElement, options = {}) {
     // Configuration options with default
@@ -12,7 +14,7 @@ export class GearShifter {
       lines: ['RP', '12', '34', '56', '78'],
       hLine: 'CD',
       initialGear: 'P',
-      animationDuration: 100,
+      animationDuration: gearStickMoveDelay - 10, // deduce neutralPause delay
       neutralPause: 10,
       ...options
     };
@@ -21,6 +23,12 @@ export class GearShifter {
     this.container = containerElement;
     this.tracker = document.createElement('div');
     this.tracker.className = 'tracker';
+    this.container.appendChild(this.tracker);
+    
+    // Create stick element
+    this.stick = document.createElement('div');
+    this.stick.className = 'gear-stick';
+    this.container.appendChild(this.stick);
     this.container.appendChild(this.tracker);
 
     // Shifter State
@@ -44,6 +52,7 @@ export class GearShifter {
     this.initializeStyles();
     this.initializeLines();
     this.setupEventListeners();
+    this.updateShadow();
   }
 
   on(eventName, callback) {
@@ -65,7 +74,6 @@ export class GearShifter {
     // Set tracker initial position
     this.tracker.style.position = 'absolute';
     this.tracker.style.borderRadius = '50%';
-    this.tracker.style.cursor = 'move';
     this.tracker.style.transform = 'translate(-50%, -50%)';
     this.tracker.style.zIndex = '10';
     this.tracker.style.transition = 'all 0.2s ease';
@@ -90,7 +98,7 @@ export class GearShifter {
     this.points[this.config.hLine[1]] = { x: size - start, y: size / 2, gear: 'N' };
 
     // Set initial position
-    this.moveToGear(this.config.initialGear);
+    this.moveToGear(this.currentGear || this.config.initialGear);
   }
 
   createLineElement(line, x) {
@@ -116,6 +124,26 @@ export class GearShifter {
     }
     this.prevGear = this.currentGear;
   }
+
+updateShadow() {
+  const trackerX = parseFloat(this.tracker.style.left);
+  const trackerY = parseFloat(this.tracker.style.top);
+  const neutralY = this.parseSizeValue(this.config.gearBoxSize) / 2;
+  const distance = Math.abs(trackerY - neutralY);
+  
+  if (distance < 1) {
+    this.stick.style.height = '0px';
+  } else {
+    const isAboveNeutral = trackerY < neutralY;
+    
+    this.stick.style.left = `${trackerX}px`;
+    this.stick.style.height = `${distance}px`;
+    this.stick.style.top = isAboveNeutral ? `${trackerY}px` : `${neutralY}px`;
+    this.stick.style.background = isAboveNeutral
+      ? 'linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0,0,0,0.07))'
+      : 'linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0,0,0,0.07))';
+  }
+}
 
   // Public methods
   shiftUp() {
@@ -147,16 +175,16 @@ export class GearShifter {
   }
 
   moveToGear(targetGear) {
-    if(targetGear && targetGear === this.currentGear) return;
+    // if(targetGear && targetGear === this.currentGear) return;
     this.setGearPosition(targetGear);
   }
 
   // Internal methods
   moveThroughNeutral(targetGear) {
-    if (targetGear === this.currentGear) return;
+    // if (targetGear === this.currentGear) return;
     
-    const currentX = parseFloat(this.tracker.style.left);
-    const currentY = parseFloat(this.tracker.style.top);
+    const currentX = parseFloat(this.tracker.style.left || 0);
+    const currentY = parseFloat(this.tracker.style.top || 0);
     
     // Find current and target neutral points
     const currentNeutral = this.findClosestCenter(currentX, currentY);
@@ -210,6 +238,7 @@ export class GearShifter {
       
       this.tracker.style.left = `${startX + (x - startX) * easeProgress}px`;
       this.tracker.style.top = `${startY + (y - startY) * easeProgress}px`;
+      this.updateShadow();
       
       if (progress < 1) {
         requestAnimationFrame(step);
@@ -224,7 +253,7 @@ export class GearShifter {
   // Utility methods
   getGearPoint(gear) {
     if (gear === 'N') {
-      const currentX = parseFloat(this.tracker.style.left);
+      const currentX = parseFloat(this.tracker.style.left || 0);
       return this.centerPoints.reduce((closest, center) => {
         const dist = Math.abs(center.x - currentX);
         return dist < closest.dist ? { ...center, dist } : closest;
@@ -263,7 +292,7 @@ export class GearShifter {
     this.container.appendChild(this.tracker);
     this.initializeStyles();
     this.initializeLines();
-    this.setGearPosition(this.currentGear);
+    // this.setGearPosition(this.currentGear);
   }
 
   setupEventListeners() {
@@ -348,6 +377,7 @@ export class GearShifter {
     
     this.tracker.style.left = `${constrained.x}px`;
     this.tracker.style.top = `${constrained.y}px`;
+    this.updateShadow();
   }
 
   handleDragEnd() {
@@ -367,6 +397,7 @@ export class GearShifter {
     const snapPoint = this.determineSnapPoint(trackerX, trackerY, this.currentLine);
     this.tracker.style.left = `${snapPoint.x}px`;
     this.tracker.style.top = `${snapPoint.y}px`;
+    this.updateShadow();
 
     const newGear = snapPoint?.node || 'N';
     this.updateGear(newGear);

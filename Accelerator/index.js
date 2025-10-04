@@ -1,5 +1,13 @@
 import * as THREE from './audio_sim/three_js/build/three.module.js'; // For engine sound effects
 import {SoundGeneratorAudioListener, EngineSoundGenerator} from './audio_sim/engine_sound_generator/sound_generator_worklet.js';
+import { SoundManager } from "./carFx.js";
+import { GearShifter } from "./gearShifter.js";
+import { createManagedInterval } from "./utils.js";
+import { Gauge } from "./Guage.js";
+import { gearStickMoveDelay } from './constants.js';
+
+const soundManager = new SoundManager();
+const shifter = new GearShifter(document.querySelector('.container'));
 
 const MAX_SPEED = 400;
 const SPEED_UNITS = 'km/h';
@@ -8,7 +16,7 @@ const RPM_REDLINE = 9000;
 const OIL_TEMP_MAX = 300;
 const TEMP_UNITS = '°C';
 const ENGINE_IDLE_RPM = 1000;
-const NEUTRAL_REV_LIMIT = 8500;
+const NEUTRAL_REV_LIMIT = 9000;
 
 var rpmParam, soundCarEngine;
 let engineReadyPromise = false;
@@ -85,14 +93,6 @@ function stopEngineAudio(){
     soundCarEngine.stop();
 }
 
-import { SoundManager } from "./carFx.js";
-import { GearShifter } from "./gearShifter.js";
-import { createManagedInterval } from "./utils.js";
-import { Gauge } from "./Guage.js";
-
-const soundManager = new SoundManager();
-const shifter = new GearShifter(document.querySelector('.container'));
-
 // input elements
 const gasPedal = document.getElementById('gas-pedal'); // GAS pedal
 const brakePedal = document.getElementById('brake-pedal'); // BRAKE pedal
@@ -141,36 +141,49 @@ const oilTempGauge  = new Gauge(oil_temp_guage, {
 
 // state variables
 let accelerateInterval, descelerateInterval, shiftDelayId, shiftAnimationId;
-let speed = 0, prevGear = 0, currentGear = 'P', isThrottlePressed = false;
+let speed = 0, prevGear = 0, currentGear = 'P', isThrottlePressed = false, prevSpeed = null;
 let ignition = false, isEngineBusy = false;
 let keyDown = false, keyUp = false, isManualMode = false;
 const gearSequence = ['R', 'P', 'N', 1, 2, 3, 4, 5, 6, 7, 8], gearDisplayCap = 3;
 const rpmParams = {
     gearRatios: {
       'P': 0, 'R': 0.6, 'N': 0,
-      1: 4.25, 2: 2.5, 3: 1.75, 
-      4: 1.40, 5: 1.16, 6: 0.99,
-      7: 0.912, 8: 0.75
+      1: 4.25, 2: 2.6, 3: 1.80, 
+      4: 1.41, 5: 1.18, 6: 0.99,
+      7: 0.92, 8: 0.75
     },
     currentRPM: 0
 };
 
+function throttle(fn, limit) {
+  let inThrottle;
+  return function (...args) {
+    if (!inThrottle) {
+        fn.apply(this, args);
+        inThrottle = true;
+        setTimeout(() => inThrottle = false, limit);
+    }
+  };
+}
+
+let throttledGearChange = throttle(displayGearChange, gearStickMoveDelay);
+
 // gear profiles 
 // gear profile = (() => accelerateHelper(interval, gearTopSpeed, next_gear_callback || null));
 // 0 -> 80 in 1.8s, so each tick cost 22.5ms
-const gear1 = () => accelerateHelper(22.5, 80, isManualMode ? null : () => shiftDelay(gear2, 150));
+const gear1 = () => accelerateHelper(22.5, 80, isManualMode ? null : () => shiftDelay(gear2));
 // 80 -> 140, shiftDelay(0.15s) + 1.05s = 1.2s
-const gear2 = () => accelerateHelper(17.5, 140, isManualMode ? null : () => shiftDelay(gear3, 120)); 
+const gear2 = () => accelerateHelper(17.5, 140, isManualMode ? null : () => shiftDelay(gear3)); 
 // 140 -> 200, 0.12s + 1.68s = 1.8s
-const gear3 = () => accelerateHelper(28, 200, isManualMode ? null : () => shiftDelay(gear4, 80));
+const gear3 = () => accelerateHelper(28, 200, isManualMode ? null : () => shiftDelay(gear4));
 // 200 -> 250, 0.08 + 2.12s = 2.2s
-const gear4 = () => accelerateHelper(42.4, 250, isManualMode ? null : () => shiftDelay(gear5, 80));
+const gear4 = () => accelerateHelper(42.4, 250, isManualMode ? null : () => shiftDelay(gear5));
 // 250 -> 300, 0.08 + 3.62s = 3.7s
-const gear5 = () => accelerateHelper(72.4, 300, isManualMode ? null : () => shiftDelay(gear6, 60));
+const gear5 = () => accelerateHelper(72.4, 300, isManualMode ? null : () => shiftDelay(gear6));
 // 300 -> 350, 0.06 + 6.14s = 6.2s
-const gear6 = () => accelerateHelper(122.8, 350, isManualMode ? null : () => shiftDelay(gear7, 30));
+const gear6 = () => accelerateHelper(122.8, 350, isManualMode ? null : () => shiftDelay(gear7));
 // 350 -> 380, 0.03 + 9.17s = 9.2s
-const gear7 = () => accelerateHelper(305.66, 380, isManualMode ? null : () => shiftDelay(gear8, 20));
+const gear7 = () => accelerateHelper(305.66, 380, isManualMode ? null : () => shiftDelay(gear8));
 // 380 -> 400, 0.02 + 5.88s = 5.9s
 const gear8 = () => accelerateHelper(294, 400);
 
@@ -270,14 +283,19 @@ function displayGearChange(gear){
             node.textContent = gearSequence.slice(gearIndex + 1, gearIndex + gearDisplayCap + 1).join('');
         }
     }
+    prevGear = gear;
 }
 
 // This function uses speed to determine the current gear
 const renderGearChangeBySpeed = (speed) => {
     if(isManualMode) return;
     currentGear = getCurrentGearBySpeed(speed);
-    if(isGearChange()) displayGearChange();
-    prevGear = currentGear;
+    if(isGearChange() && (speed <= prevSpeed || speed<=80)) { 
+        // Only initialize gearChange when slowing down or for first gear 
+        // For other gears, shiftDelay will handle
+        displayGearChange(currentGear);
+    }
+    prevSpeed = speed;
 }
 
 // helper function to update needle position, digital speed and gears
@@ -339,7 +357,8 @@ function accelerateHelper(interval, ...args){
     accelerateInterval = createManagedInterval(performAccelerate, interval, {}, ...args);
 }
 // Helper to perform gear shift after a given delay
-function shiftDelay (nextGearCB, gearShiftDelay = 200) {
+function shiftDelay (nextGearCB, gearShiftDelay = gearStickMoveDelay) {
+    throttledGearChange(getCurrentGearBySpeed(speed) + 1); // handle up shift gear change
     shiftDelayId = setTimeout(nextGearCB, gearShiftDelay);
 }
 

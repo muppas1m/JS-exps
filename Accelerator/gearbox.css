@@ -3,11 +3,11 @@
   --track-begin-end-gutter: 0px;
   --tracker-size: 25px;
   --tracker-color: rgb(209, 21, 0);
-  --track-width: 3px;
+  --track-width: 4px;
   --gear-box-margin: 8px;
   --box-container-pad: 30px;
   --box-container-outline-width: 5px;
-  --box-container-outline-color: #737373;
+  --box-container-outline-color: #a0a0a0;
   --box-container-outline-border: var(--box-container-outline-width) solid var(--box-container-outline-color);
   --gear-mark-size: 1.3em;
   --gear-mark-dist: -0.5em;
@@ -22,7 +22,6 @@
     user-select: none;
     -webkit-user-select: none;
 }
-
 .gear-map {
   padding: var(--box-container-pad);
   border: var(--box-container-outline-border);
@@ -45,10 +44,14 @@
                 inset -2px -1px 40px rgba(0,0,0,0.4), 
                 0 0 1px #000; 
     border-radius: 50%;
-    cursor: move;
+    cursor: grab;
     transform: translate(-50%, -50%);
     z-index: 10;
 }
+.tracker:active{
+  cursor: grabbing;
+}
+/* shining effect of knob */
 .tracker::after {
     content: "";
     width: 60%; 
@@ -58,7 +61,18 @@
     top: 50%;
     transform: translate(-50%, calc(-50% - 55%));
     background: rgba(240, 128, 128, 0.25);
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
     border-radius: 40px / 20px; 
+}
+.gear-stick {
+  position: absolute;
+  width: calc(var(--track-width) - 2px);
+  background: linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0.07));
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 5;
+  transition: height 0.15s ease, top 0.15s ease, left 0.15s ease;
+  transform: translateX(-50%);
 }
 .line {
   position: absolute;
@@ -109,7 +123,7 @@
     --gear-box-size: 150px;
     --track-begin-end-gutter: 0px;
     --tracker-size: 40px;
-    --track-width: 5px;
+    --track-width: 6px;
     --gear-box-margin: 10px;
     --box-container-pad: 50px;
     --gear-mark-size: 1.3em;
