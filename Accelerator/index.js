@@ -335,7 +335,7 @@ function performDescelerate(e, step = 1, rate = 50, callback) {
 function playShiftSoundHelper(){
     setTimeout(() => {
         soundManager.playShiftSound();
-    }, gearStickMoveDelay + 10)
+    }, Math.max(gearStickMoveDelay - 20, 0))
 }
 
 // Helper to handle acceleration
