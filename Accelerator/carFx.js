@@ -35,7 +35,7 @@ export class SoundManager {
   }
   loadSound(id) {
     const element = document.getElementById(id);
-    // iOS requires this for audio elements
+    // for iOS
     element.preload = 'auto';
     element.load();
     

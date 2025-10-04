@@ -1,9 +1,9 @@
 :root {
   --gear-box-size: 80px;
   --track-begin-end-gutter: 0px;
-  --tracker-size: 17px;
-  --tracker-color: rgb(255, 25, 0);
-  --track-width: 2px;
+  --tracker-size: 30px;
+  --tracker-color: rgb(209, 21, 0);
+  --track-width: 3px;
   --gear-box-margin: 8px;
   --box-container-pad: 30px;
   --box-container-outline-width: 5px;
@@ -41,12 +41,25 @@
     width: var(--tracker-size);
     height: var(--tracker-size);
     background-color: var(--tracker-color);
+    box-shadow: inset 0 -5px 15px rgba(255,255,255,0.4), 
+                inset -2px -1px 40px rgba(0,0,0,0.4), 
+                0 0 1px #000; 
     border-radius: 50%;
     cursor: move;
     transform: translate(-50%, -50%);
     z-index: 10;
 }
-
+.tracker::after {
+    content: "";
+    width: 60%; 
+    height: 35%; 
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, calc(-50% - 7px));
+    background: rgba(240, 128, 128, 0.25);
+    border-radius: 40px / 20px; 
+}
 .line {
   position: absolute;
   height: var(--track-width);
@@ -95,8 +108,8 @@
   :root{
     --gear-box-size: 150px;
     --track-begin-end-gutter: 0px;
-    --tracker-size: 20px;
-    --track-width: 3px;
+    --tracker-size: 40px;
+    --track-width: 5px;
     --gear-box-margin: 10px;
     --box-container-pad: 50px;
     --gear-mark-size: 1.3em;
