@@ -1,7 +1,7 @@
 :root {
   --gear-box-size: 80px;
   --track-begin-end-gutter: 0px;
-  --tracker-size: 20px;
+  --tracker-size: 25px;
   --tracker-color: rgb(209, 21, 0);
   --track-width: 3px;
   --gear-box-margin: 8px;
@@ -56,7 +56,7 @@
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, calc(-50% - 7px));
+    transform: translate(-50%, calc(-50% - 55%));
     background: rgba(240, 128, 128, 0.25);
     border-radius: 40px / 20px; 
 }
