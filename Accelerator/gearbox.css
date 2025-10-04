@@ -81,6 +81,7 @@
   top: calc(var(--gear-box-size) / 2);
   left: var(--track-begin-end-gutter);
   width: calc(var(--gear-box-size) - (var(--track-begin-end-gutter)*2));
+  border-radius: 5px;
 }
 
 .line:not(.line.horizontal) {
