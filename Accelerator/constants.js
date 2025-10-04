@@ -1,1 +1,1 @@
-export const gearStickMoveDelay = 150;
+export const gearStickMoveDelay = 160;

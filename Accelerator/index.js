@@ -264,8 +264,8 @@ shifter.on('gearChange', handleManualGearShift); // Event Listener
 function displayGearChange(gear){
     if(gear) currentGear = gear;
 
-    // Pkay shift sound, when slowing, or for the first gear, or for manual mode
-    if (!isThrottlePressed || (isThrottlePressed && currentGear === 1) || (isThrottlePressed && isManualMode)) soundManager.playShiftSound();
+    // Play shift sound, when slowing, or for the first gear, or for manual mode
+    if (!isThrottlePressed || (isThrottlePressed && currentGear === 1) || (isThrottlePressed && isManualMode)) playShiftSoundHelper();
     
     const gearIndex = gearSequence.findIndex(gear => (['R,P,N'].includes(currentGear) || gear===currentGear));
     for (let node of gearIndicator.children) {
@@ -331,6 +331,13 @@ function performDescelerate(e, step = 1, rate = 50, callback) {
         renderAll();
     }, rate)
 }
+
+function playShiftSoundHelper(){
+    setTimeout(() => {
+        soundManager.playShiftSound();
+    }, gearStickMoveDelay + 10)
+}
+
 // Helper to handle acceleration
 function performAccelerate(maxSpeed, nextGearCB, options = {}){
     const { step = 1 } = options;
@@ -344,7 +351,7 @@ function performAccelerate(maxSpeed, nextGearCB, options = {}){
                 renderAll();
             }, 50)
         } else{
-            if(!isManualMode && speed < MAX_SPEED) soundManager.playShiftSound(); // for accelerating
+            if(!isManualMode && speed < MAX_SPEED) playShiftSoundHelper(); // for accelerating
             return (nextGearCB && nextGearCB());
         }
     }
