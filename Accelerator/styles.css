@@ -275,9 +275,9 @@ body{
 .clock.ignition .guage-cover > span:not(.point) > span{
     animation: print linear forwards;
     animation-duration: calc(var(--i)*0.08s);
-    text-shadow: 0 0 10px #00bfff,
+    /* text-shadow: 0 0 10px #00bfff,
                0 0 40px #00bfff,
-               0 0 50px #00bfff;
+               0 0 50px #00bfff; */
 }
 .guage-cover > span{
     width: 100%;
@@ -435,7 +435,7 @@ body{
     text-shadow: none;
 }
 .rpm_guage.ignition .redline-marker{
-    text-shadow: 0 0 5px rgba(var(--redline-color), 0.7);
+    /* text-shadow: 0 0 5px rgba(var(--redline-color), 0.7); */
     font-weight: bolder !important;
     text-shadow: 0 0 10px var(--redline-color), 0 0 40px var(--redline-color), 0 0 50px var(--redline-color) !important;
 }
