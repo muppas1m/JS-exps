@@ -140,8 +140,8 @@ updateShadow() {
     this.stick.style.height = `${distance}px`;
     this.stick.style.top = isAboveNeutral ? `${trackerY}px` : `${neutralY}px`;
     this.stick.style.background = isAboveNeutral
-      ? 'linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0,0,0,0.07))'
-      : 'linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0,0,0,0.07))';
+      ? 'linear-gradient(to bottom, rgba(0, 0, 0, 1), var(--box-container-outline-color))'
+      : 'linear-gradient(to top, rgba(0, 0, 0, 1), var(--box-container-outline-color))';
   }
 }
 
