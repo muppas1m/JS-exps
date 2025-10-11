@@ -436,6 +436,9 @@ body{
     transform: rotate(calc(26deg * 8.5 - 132deg));
     border-radius: 50%;
 }
+.rpm_guage.ignition .guage-cover::after{
+    background: radial-gradient(ellipse at center, #00000000 60%, rgba(var(--redline-color), 1) 80%, rgba(var(--redline-color), 2) 100%);
+}
 /* redline scale marks */
 .redline-marker {
     opacity: 0.5;
