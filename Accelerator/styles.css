@@ -364,7 +364,7 @@ body{
     font-size: 1.5em;
 }
 .clock.ignition #digitalSpeed{
-    text-shadow: 0 0 7px #00bfff;
+    text-shadow: 0 0 4px #00bfff;
 }
 #gearIndicator{
     display: grid;
@@ -386,7 +386,7 @@ body{
     opacity: 1;
 }
 .clock.ignition .currentGear{
-    text-shadow: 0 0 7px #00bfff;
+    text-shadow: 0 0 4px #00bfff;
 }
 #gearIndicator.shift .currentGear{
     transform: scale(1.3);
